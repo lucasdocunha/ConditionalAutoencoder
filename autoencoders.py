@@ -188,6 +188,7 @@ class Decoder2(nn.Module):
 
         self.fc = nn.Linear(latent_dim, 16 * 16 * 16)
 
+        self.conv6 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
         self.conv5 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
         self.conv4 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
@@ -200,15 +201,16 @@ class Decoder2(nn.Module):
         x = self.fc(x)                       # (B, 4096)
         x = x.view(-1, 16, 16, 16)           # (B, 16, 16, 16)
 
-        x = F.relu(self.conv5(x))            # (B, 16, 16, 16)
+        x = F.relu(self.conv6(x))            # (B, 16, 16, 16)
         x = self.upsample(x)                 # (B, 16, 32, 32)
 
-        x = F.relu(self.conv4(x))            # (B, 16, 32, 32)
+        x = F.relu(self.conv5(x))            # (B, 16, 32, 32)
         x = self.upsample(x)                 # (B, 16, 64, 64)
 
-        x = F.relu(self.conv3(x))            # (B, 32, 64, 64)
+        x = F.relu(self.conv4(x))            # (B, 32, 64, 64)
         x = self.upsample(x)                 # (B, 32, 128, 128)
 
+        x = F.relu(self.conv3(x))            # (B, 32, 128, 128)
         x = F.relu(self.conv2(x))            # (B, 32, 128, 128)
         x = self.conv1(x)                    # (B, 3, 128, 128)
 
@@ -219,6 +221,153 @@ class Autoencoder2(nn.Module):
         super().__init__()
         self.encoder = Encoder2(latent_dim)
         self.decoder = Decoder2(latent_dim)
+
+    def forward(self, x):
+        z = self.encoder(x)
+        out = self.decoder(z)
+        return out
+
+
+
+#################################
+class Encoder3(nn.Module):
+    def __init__(self, latent_dim=1674):
+        super().__init__()
+
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(32, 8, kernel_size=3, padding=1)
+
+        self.pool = nn.MaxPool2d(2, 2)
+
+        self.flatten = nn.Flatten()
+        self.fc = nn.Linear(32 * 32 * 8, latent_dim)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))  
+        x = self.pool(x)
+        x = F.relu(self.conv2(x))   
+        x = self.pool(x)
+                
+        x = self.flatten(x)        
+        x = self.fc(x)            
+        return x
+    
+class Decoder3(nn.Module):
+    def __init__(self, latent_dim=1674):
+        super().__init__()
+
+        self.fc = nn.Linear(latent_dim, 16 * 16 * 16)
+
+        self.conv3 = nn.Conv2d(16, 8, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(8, 32, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(32, 3, kernel_size=3, padding=1)
+
+        self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
+
+    def forward(self, x):
+        x = self.fc(x)                       
+        x = x.view(-1, 16, 16, 16)          
+
+        x = F.relu(self.conv3(x))            
+        x = self.upsample(x)                 
+
+        x = F.relu(self.conv2(x))            
+        x = self.conv1(x) 
+        
+        return x
+    
+class Autoencoder3(nn.Module):
+    def __init__(self, latent_dim=1674):
+        super().__init__()
+        self.encoder = Encoder3(latent_dim)
+        self.decoder = Decoder3(latent_dim)
+
+    def forward(self, x):
+        z = self.encoder(x)
+        out = self.decoder(z)
+        return out
+
+#################################
+class Encoder4(nn.Module):
+    def __init__(self, latent_dim=562):
+        super().__init__()
+
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(64, 16, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(16, 64, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+        self.conv5 = nn.Conv2d(128, 64, kernel_size=3, padding=1)
+        self.conv6 = nn.Conv2d(64, 16, kernel_size=3, padding=1)
+
+
+        self.pool = nn.MaxPool2d(2, 2)
+
+        self.flatten = nn.Flatten()
+        self.fc = nn.Linear(4 * 4 * 16, latent_dim)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))  
+        x = self.pool(x)
+        
+        x = F.relu(self.conv2(x))  
+        
+        x = F.relu(self.conv3(x)) 
+        x = self.pool(x)
+        
+        x = F.relu(self.conv4(x))
+        x = self.pool(x)
+        
+        x = F.relu(self.conv5(x))
+        x = self.pool(x)
+        
+        x = F.relu(self.conv6(x))
+        x = self.pool(x)
+        
+        x = self.flatten(x)        
+        
+        x = self.fc(x)            
+        return x
+    
+class Decoder4(nn.Module):
+    def __init__(self, latent_dim=562):
+        super().__init__()
+
+        self.fc = nn.Linear(latent_dim, 4 * 4 * 16)
+
+        self.conv7 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
+        self.conv6 = nn.Conv2d(16, 64, kernel_size=3, padding=1)
+        self.conv5 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(128, 64, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(64, 16, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(16, 64, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(64, 3, kernel_size=3, padding=1)
+        
+        self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
+
+    def forward(self, x):
+        x = self.fc(x)                       
+        x = x.view(-1, 16, 4, 4) 
+        
+        x = F.relu(self.conv7(x))         
+        x = self.upsample(x)
+        x = F.relu(self.conv6(x))
+        x = self.upsample(x)
+        x = F.relu(self.conv5(x))
+        x = self.upsample(x)
+        x = F.relu(self.conv4(x))
+        x = self.upsample(x)
+        x = F.relu(self.conv3(x))                  
+        x = F.relu(self.conv2(x))            
+        x = self.upsample(x)        
+        x = self.conv1(x) 
+        
+        return x
+    
+class Autoencoder4(nn.Module):
+    def __init__(self, latent_dim=562):
+        super().__init__()
+        self.encoder = Encoder4(latent_dim)
+        self.decoder = Decoder4(latent_dim)
 
     def forward(self, x):
         z = self.encoder(x)
