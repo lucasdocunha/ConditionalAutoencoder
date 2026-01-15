@@ -240,7 +240,7 @@ class Encoder3(nn.Module):
         self.pool = nn.MaxPool2d(2, 2)
 
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(32 * 32 * 8, latent_dim)
+        self.fc = nn.Linear(8 * 32 * 32, latent_dim)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))  
@@ -258,7 +258,7 @@ class Decoder3(nn.Module):
 
         self.fc = nn.Linear(latent_dim, 8 * 32 * 32)
 
-        self.conv3 = nn.Conv2d(32, 8, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(8, 8, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(8, 32, kernel_size=3, padding=1)
         self.conv1 = nn.Conv2d(32, 3, kernel_size=3, padding=1)
 
@@ -266,13 +266,14 @@ class Decoder3(nn.Module):
 
     def forward(self, x):
         x = self.fc(x)                       
-        x = x.view(-1, 16, 16, 16)          
+        x = x.view(-1, 8, 32, 32)          
 
         x = F.relu(self.conv3(x))            
-        x = self.upsample(x)                 
+        x = self.upsample(x)                 # 32 -> 64
 
         x = F.relu(self.conv2(x))            
-        x = self.conv1(x) 
+        x = self.upsample(x)                 # 64 -> 128
+        x = torch.sigmoid(self.conv1(x))
         
         return x
     
@@ -303,7 +304,7 @@ class Encoder4(nn.Module):
         self.pool = nn.MaxPool2d(2, 2)
 
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(4 * 4 * 16, latent_dim)
+        self.fc = nn.Linear(16 * 4 * 4, latent_dim)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))  
@@ -386,7 +387,7 @@ class Encoder5(nn.Module):
         self.pool = nn.MaxPool2d(2, 2)
 
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(16 * 16 * 8, latent_dim)
+        self.fc = nn.Linear(8 * 16 * 16, latent_dim)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))  
@@ -409,7 +410,7 @@ class Decoder5(nn.Module):
 
         self.fc = nn.Linear(latent_dim, 16 * 16 * 8)
 
-        self.conv4 = nn.Conv2d(16, 8, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(8, 8, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(8, 128, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(128, 16, kernel_size=3, padding=1)
         self.conv1 = nn.Conv2d(16, 3, kernel_size=3, padding=1)
@@ -541,7 +542,7 @@ class Decoder7(nn.Module):
 
     def forward(self, x):
         x = self.fc(x)                       
-        x = x.view(-1, 64, 32, 32) 
+        x = x.view(-1, 16, 64, 64) 
         
         x = F.relu(self.conv4(x))
         x = self.upsample(x)

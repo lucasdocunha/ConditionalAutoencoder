@@ -106,7 +106,7 @@ for train in ['CNR', 'PKLot']:
         criterion = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-        num_epochs = 1
+        num_epochs = 100
         train_losses = []
         val_losses = []
         
