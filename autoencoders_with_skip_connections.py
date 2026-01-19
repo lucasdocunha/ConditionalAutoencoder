@@ -325,7 +325,7 @@ class SkipEncoder4(nn.Module):
         
         x2 = F.relu(self.conv2(x))  
         
-        x3 = F.relu(self.conv3(x)) 
+        x3 = F.relu(self.conv3(x2)) 
         x = self.pool(x3)
         
         x4 = F.relu(self.conv4(x))
