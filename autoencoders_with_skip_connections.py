@@ -28,10 +28,10 @@ class SkipEncoder0(nn.Module):
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))   # (B, 8, 128, 128)
-        x = self.pool(x)            # (B, 8, 64, 64)
+        x = self.pool(x1)            # (B, 8, 64, 64)
 
         x2 = F.relu(self.conv2(x))   # (B, 16, 64, 64)
-        x = self.pool(x)            # (B, 16, 32, 32)
+        x = self.pool(x2)            # (B, 16, 32, 32)
 
         x = self.flatten(x)         # (B, 16384)
         z = self.fc(x)              # (B, 1849)
@@ -91,18 +91,18 @@ class SkipEncoder1(nn.Module):
         self.fc = nn.Linear(16 * 16 * 32, latent_dim)
 
     def forward(self, x):
-        x1 = F.relu(self.conv1(x))   # (B, 8, 128, 128)
-        x = self.pool(x)            # (B, 8, 64, 64)
+        x1 = F.relu(self.conv1(x))   # (B, 32, 128, 128)
+        x = self.pool(x1)            # (B, 32, 64, 64)
 
-        x2 = F.relu(self.conv2(x))   # (B, 16, 64, 64)
-        x = self.pool(x)            # (B, 16, 32, 32)
+        x2 = F.relu(self.conv2(x))   # (B, 8, 64, 64)
+        x = self.pool(x2)            # (B, 8, 32, 32)
 
-        x3 = F.relu(self.conv3(x))   # (B, 16, 64, 64)
-        x = self.pool(x)           # (B, 16, 32, 32)
+        x3 = F.relu(self.conv3(x))   # (B, 64, 32, 32)
+        x = self.pool(x3)           # (B, 64, 16, 16)
         
-        x4 = F.relu(self.conv4(x))   # (B, 16, 64, 64)
+        x4 = F.relu(self.conv4(x))   # (B, 32, 16, 16)
         
-        x = self.flatten(x)         # (B, 16384)
+        x = self.flatten(x4)         # (B, 8192)
         z = self.fc(x)              # (B, 467)
         return z, x1, x2, x3, x4
 
@@ -171,17 +171,17 @@ class SkipEncoder2(nn.Module):
     def forward(self, x):
         x1 = F.relu(self.conv1(x))   # (B, 8, 128, 128)
 
-        x2 = F.relu(self.conv2(x))   # (B, 16, 64, 64)
+        x2 = F.relu(self.conv2(x1))   # (B, 16, 64, 64)
 
-        x3 = F.relu(self.conv3(x))   # (B, 16, 64, 64)
-        x = self.pool(x)            # (B, 16, 32, 32)
-                
+        x3 = F.relu(self.conv3(x2))   # (B, 16, 64, 64)
+        x = self.pool(x3)            # (B, 16, 32, 32)
+
         x4 = F.relu(self.conv4(x))   # (B, 16, 64, 64)
-        x = self.pool(x)            # (B, 16, 32, 32)
+        x = self.pool(x4)            # (B, 16, 32, 32)
         
         x5 = F.relu(self.conv5(x))   # (B, 16, 64, 64)
-        x = self.pool(x)            # (B, 16, 32,
-        
+        x = self.pool(x5)            # (B, 16, 32, 32)
+
         x = self.flatten(x)         # (B, 16384)
         x = self.fc(x)              # (B, 1411)
         return x, x1, x2, x3, x4, x5
@@ -255,9 +255,9 @@ class SkipEncoder3(nn.Module):
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))  
-        x = self.pool(x)
+        x = self.pool(x1)
         x2 = F.relu(self.conv2(x))   
-        x = self.pool(x)
+        x = self.pool(x2)
                 
         x = self.flatten(x)        
         x = self.fc(x)            
@@ -321,21 +321,21 @@ class SkipEncoder4(nn.Module):
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))  
-        x = self.pool(x)
+        x = self.pool(x1)
         
         x2 = F.relu(self.conv2(x))  
         
         x3 = F.relu(self.conv3(x)) 
-        x = self.pool(x)
+        x = self.pool(x3)
         
         x4 = F.relu(self.conv4(x))
-        x = self.pool(x)
+        x = self.pool(x4)
         
         x5 = F.relu(self.conv5(x))
-        x = self.pool(x)
+        x = self.pool(x5)
         
         x6 = F.relu(self.conv6(x))
-        x = self.pool(x)
+        x = self.pool(x6)
         
         x = self.flatten(x)        
         
@@ -417,13 +417,13 @@ class SkipEncoder5(nn.Module):
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))  
-        x = self.pool(x)
+        x = self.pool(x1)
         
         x2 = F.relu(self.conv2(x))  
-        x = self.pool(x)
+        x = self.pool(x2)
         
         x3 = F.relu(self.conv3(x)) 
-        x = self.pool(x)
+        x = self.pool(x3)
         
         x = self.flatten(x)        
         
@@ -489,10 +489,10 @@ class SkipEncoder6(nn.Module):
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))  
-        x = self.pool(x)
+        x = self.pool(x1)
         
         x2 = F.relu(self.conv2(x))  
-        x = self.pool(x)
+        x = self.pool(x2)
                 
         x = self.flatten(x)        
         
@@ -623,9 +623,9 @@ class SkipEncoder8(nn.Module):
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))  
-        x = self.pool(x)
+        x = self.pool(x1)
         x2 = F.relu(self.conv2(x))  
-        x = self.pool(x)                
+        x = self.pool(x2)                
         x = self.flatten(x)        
         
         x = self.fc(x)            
@@ -688,15 +688,15 @@ class SkipEncoder9(nn.Module):
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))  
-        x = self.pool(x)
+        x = self.pool(x1)
         x2 = F.relu(self.conv2(x))  
-        x = self.pool(x)  
+        x = self.pool(x2)  
         x3 = F.relu(self.conv3(x))  
-        x = self.pool(x)      
+        x = self.pool(x3)      
         x4 = F.relu(self.conv4(x))  
-        x = self.pool(x)     
+        x = self.pool(x4)     
         x5 = F.relu(self.conv5(x))  
-        x = self.pool(x)     
+        x = self.pool(x5)     
                         
         x = self.flatten(x)        
         

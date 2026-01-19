@@ -7,7 +7,7 @@ import os
 import pandas as pd 
 import matplotlib.pyplot as plt
 from autoencoders import *
-
+from autoencoders_with_skip_connections import *
 
 class CustomImageDataset(Dataset):
     """Dataset customizado para imagens"""
@@ -96,7 +96,7 @@ for train in ['CNR', 'PKLot']:
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
-    for model_class in [Autoencoder0, Autoencoder1, Autoencoder2, Autoencoder3, Autoencoder4, Autoencoder5, Autoencoder6, Autoencoder7, Autoencoder8, Autoencoder9]:
+    for model_class in [SkipAutoencoder0, SkipAutoencoder1, SkipAutoencoder2, SkipAutoencoder3, SkipAutoencoder4, SkipAutoencoder5, SkipAutoencoder6, SkipAutoencoder7, SkipAutoencoder8, SkipAutoencoder9]:
         model_name = model_class.__name__
         print(f"\n{'='*70}")
         print(f"Treinando {model_name} com dataset {train}")
@@ -106,7 +106,7 @@ for train in ['CNR', 'PKLot']:
         criterion = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-        num_epochs = 100
+        num_epochs = 1
         train_losses = []
         val_losses = []
         
