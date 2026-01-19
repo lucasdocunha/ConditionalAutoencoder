@@ -555,13 +555,15 @@ class Encoder7(nn.Module):
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))  
+        x = self.pool(x1)                
         x2 = F.relu(self.conv2(x))  
+        x = self.pool(x2)
         x3 = F.relu(self.conv3(x))
-        x = self.pool(x)                
+        x = self.pool(x3)
         x = self.flatten(x)        
         
-        x = self.fc(x)            
-        return x, x1, x2, x3
+        z = self.fc(x)            
+        return z, x1, x2, x3
     
 class Decoder7(nn.Module):
     def __init__(self, latent_dim=1960):
@@ -576,22 +578,23 @@ class Decoder7(nn.Module):
         
         self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
 
-    def forward(self, x, x1, x2, x3):
-        x = self.fc(x)                       
-        x = x.view(-1, 64, 32, 32) 
+    def forward(self, z, x1, x2, x3):
+        x = self.fc(z)                       
+        x = x.view(-1, 16, 32, 32) 
         
         x = F.relu(self.conv4(x))
         x = self.upsample(x)
         x = x + x3                        # Skip connection
         
         x = F.relu(self.conv3(x))
-        x = x + x2
+        x = x + x2                        # Skip connection
         
         x = F.relu(self.conv2(x))
-        x = x + x1   
+        x = x + x1                        # Skip connection
+        
         x = self.conv1(x) 
         
-        return x, x1, x2, x3
+        return x
     
 class Autoencoder7(nn.Module):
     def __init__(self, latent_dim=1960):
@@ -663,8 +666,8 @@ class Autoencoder8(nn.Module):
         self.decoder = Decoder8(latent_dim)
 
     def forward(self, x):
-        z = self.encoder(x)
-        out = self.decoder(z)
+        z, x1, x2 = self.encoder(x)
+        out = self.decoder(z, x1, x2)
         return out
     
 ##########################################
