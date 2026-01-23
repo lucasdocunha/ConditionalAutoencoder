@@ -14,6 +14,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import mlflow 
+
+
 class SkipEncoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
@@ -551,7 +554,7 @@ class SkipEncoder7(nn.Module):
         self.pool = nn.MaxPool2d(2, 2)
 
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(64 * 64 * 16, latent_dim)
+        self.fc = nn.Linear(16 * 16 * 16, latent_dim)
 
     def forward(self, x):
         x1 = F.relu(self.conv1(x))  
@@ -569,7 +572,7 @@ class SkipDecoder7(nn.Module):
     def __init__(self, latent_dim=1960):
         super().__init__()
 
-        self.fc = nn.Linear(latent_dim, 64 * 64 * 16)
+        self.fc = nn.Linear(latent_dim, 16 * 16 * 16)
 
         self.conv4 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
