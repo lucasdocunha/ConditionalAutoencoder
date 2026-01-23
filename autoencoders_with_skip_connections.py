@@ -14,6 +14,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import mlflow 
+
+
 class SkipEncoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
