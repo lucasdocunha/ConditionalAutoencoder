@@ -151,68 +151,63 @@ for dataset_name in datasets:
             criterion = nn.MSELoss()
             optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-        num_epochs = 1
-        train_losses = []
-        val_losses = []
-        
-        for epoch in range(num_epochs):
-            # Treino
-            model.train()
-            train_loss = 0.0
-            for images, labels in train_loader:
-                images = images.to('cuda')
-                labels = labels.to('cuda')
-                
-                outputs = model(images)
-                loss = criterion(outputs, labels)
-                
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-                
-                train_loss += loss.item()
-            
-            train_loss /= len(train_loader)
-            train_losses.append(train_loss)
-            
-            # Validação
-            model.eval()
-            val_loss = 0.0
-            with torch.no_grad():
-                for images, labels in val_loader:
-                    images = images.to('cuda')
-                    labels = labels.to('cuda')
-                    outputs = model(images)
-                    loss = criterion(outputs, labels)
-                    val_loss += loss.item()
-            
-            val_loss /= len(val_loader)
-            val_losses.append(val_loss)
-            
-            if (epoch + 1) % 10 == 0:
-                print(f'Epoch [{epoch+1}/{num_epochs}] | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f}')
+            # -------------------------
+            # Train / Val
+            # -------------------------
+            for epoch in range(num_epochs):
 
-        print(f"✓ Treinamento concluído!")
-        
-        # Salvar modelo
-        os.makedirs('./models', exist_ok=True)
-        torch.save(model.state_dict(), f'./models/{model_name}_{train}.pth')
-        print(f"✓ Modelo salvo: ./models/{model_name}_{train}.pth")
-        
-        # Teste e Plot - Pegar primeiras 8 imagens
-        model.eval()
-        test_images, test_labels = None, None
-        with torch.no_grad():
-            for images, labels in test_loader:
-                test_images = images[:8].to('cuda')
-                test_labels = labels[:8].to('cuda')
-                break
-        
-        # Predição
-        with torch.no_grad():
-            reconstructed = model(test_images)
-        
-        # Plot
-        plot_reconstruction(test_images, reconstructed, model_name, train, save_path='./results/')
-        
-        print(f"✓ {model_name} - {train} finalizado!\n")
+                model.train()
+                train_loss = 0.0
+                for x, y in train_loader:
+                    x, y = x.to(device), y.to(device)
+
+                    out = model(x)
+                    loss = criterion(out, y)
+
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+
+                    train_loss += loss.item()
+
+                train_loss /= len(train_loader)
+
+                model.eval()
+                val_loss = 0.0
+                with torch.no_grad():
+                    for x, y in val_loader:
+                        x, y = x.to(device), y.to(device)
+                        val_loss += criterion(model(x), y).item()
+
+                val_loss /= len(val_loader)
+
+                mlflow.log_metric("train_loss", train_loss, step=epoch)
+                mlflow.log_metric("val_loss", val_loss, step=epoch)
+
+            # -------------------------
+            # Test + Plot
+            # -------------------------
+            model.eval()
+            with torch.no_grad():
+                for x, _ in test_loader:
+                    x = x[:8].to(device)
+                    recon = model(x)
+                    break
+
+            plot_path = plot_reconstruction(
+                x, recon, model_name, dataset_name
+            )
+
+            mlflow.log_artifact(plot_path, artifact_path="reconstructions")
+
+            # -------------------------
+            # Models
+            # -------------------------
+            mlflow.pytorch.log_model(model, "autoencoder")
+
+            if hasattr(model, "encoder"):
+                mlflow.pytorch.log_model(model.encoder, "encoder")
+            if hasattr(model, "decoder"):
+                mlflow.pytorch.log_model(model.decoder, "decoder")
+
+            print(f"✓ {model_name} | {dataset_name} finalizado")
