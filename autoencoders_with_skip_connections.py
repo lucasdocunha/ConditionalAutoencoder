@@ -70,12 +70,12 @@ class SkipDecoder0(nn.Module):
 class SkipAutoencoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
-        self.Skipencoder = SkipEncoder0(latent_dim)
-        self.Skipdecoder = SkipDecoder0(latent_dim)
+        self.encoder = SkipEncoder0(latent_dim)
+        self.decoder = SkipDecoder0(latent_dim)
 
     def forward(self, x):
-        z, skip1, skip2 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, skip1, skip2)
+        z, skip1, skip2 = self.encoder(x)
+        out = self.decoder(z, skip1, skip2)
         return out
 
 #################################
@@ -146,12 +146,12 @@ class SkipDecoder1(nn.Module):
 class SkipAutoencoder1(nn.Module):
     def __init__(self, latent_dim=467):
         super().__init__()
-        self.Skipencoder = SkipEncoder1(latent_dim)
-        self.Skipdecoder = SkipDecoder1(latent_dim)
+        self.encoder = SkipEncoder1(latent_dim)
+        self.decoder = SkipDecoder1(latent_dim)
 
     def forward(self, x):
-        z, x1, x2, x3, x4 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, x1, x2, x3, x4)
+        z, x1, x2, x3, x4 = self.encoder(x)
+        out = self.decoder(z, x1, x2, x3, x4)
         return out
 
 
@@ -233,12 +233,12 @@ class SkipDecoder2(nn.Module):
 class SkipAutoencoder2(nn.Module):
     def __init__(self, latent_dim=1411):
         super().__init__()
-        self.Skipencoder = SkipEncoder2(latent_dim)
-        self.Skipdecoder = SkipDecoder2(latent_dim)
+        self.encoder = SkipEncoder2(latent_dim)
+        self.decoder = SkipDecoder2(latent_dim)
 
     def forward(self, x):
-        z, x1, x2, x3, x4, x5 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, x1, x2, x3, x4, x5)
+        z, x1, x2, x3, x4, x5 = self.encoder(x)
+        out = self.decoder(z, x1, x2, x3, x4, x5)
         return out
 
 
@@ -297,12 +297,12 @@ class SkipDecoder3(nn.Module):
 class SkipAutoencoder3(nn.Module):
     def __init__(self, latent_dim=1674):
         super().__init__()
-        self.Skipencoder = SkipEncoder3(latent_dim)
-        self.Skipdecoder = SkipDecoder3(latent_dim)
+        self.encoder = SkipEncoder3(latent_dim)
+        self.decoder = SkipDecoder3(latent_dim)
 
     def forward(self, x):
-        z, x1, x2 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, x1, x2)
+        z, x1, x2 = self.encoder(x)
+        out = self.decoder(z, x1, x2)
         return out
 
 #################################
@@ -397,12 +397,12 @@ class SkipDecoder4(nn.Module):
 class SkipAutoencoder4(nn.Module):
     def __init__(self, latent_dim=562):
         super().__init__()
-        self.Skipencoder = SkipEncoder4(latent_dim)
-        self.Skipdecoder = SkipDecoder4(latent_dim)
+        self.encoder = SkipEncoder4(latent_dim)
+        self.decoder = SkipDecoder4(latent_dim)
 
     def forward(self, x):
-        z, skip1, skip2, skip3, skip4, skip5, skip6 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, skip1, skip2, skip3, skip4, skip5, skip6)
+        z, skip1, skip2, skip3, skip4, skip5, skip6 = self.encoder(x)
+        out = self.decoder(z, skip1, skip2, skip3, skip4, skip5, skip6)
         return out
 
 ###############################
@@ -470,12 +470,12 @@ class SkipDecoder5(nn.Module):
 class SkipAutoencoder5(nn.Module):
     def __init__(self, latent_dim=685):
         super().__init__()
-        self.Skipencoder = SkipEncoder5(latent_dim)
-        self.Skipdecoder = SkipDecoder5(latent_dim)
+        self.encoder = SkipEncoder5(latent_dim)
+        self.decoder = SkipDecoder5(latent_dim)
 
     def forward(self, x):
-        z, skip1, skip2, skip3 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, skip1, skip2, skip3)
+        z, skip1, skip2, skip3 = self.encoder(x)
+        out = self.decoder(z, skip1, skip2, skip3)
         return out
     
 ################################################
@@ -534,12 +534,12 @@ class SkipDecoder6(nn.Module):
 class SkipAutoencoder6(nn.Module):
     def __init__(self, latent_dim=1262):
         super().__init__()
-        self.Skipencoder = SkipEncoder6(latent_dim)
-        self.Skipdecoder = SkipDecoder6(latent_dim)
+        self.encoder = SkipEncoder6(latent_dim)
+        self.decoder = SkipDecoder6(latent_dim)
 
     def forward(self, x):
-        z, skip1, skip2 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, skip1, skip2)
+        z, skip1, skip2 = self.encoder(x)
+        out = self.decoder(z, skip1, skip2)
         return out
     
 ################################################
@@ -605,12 +605,12 @@ class SkipDecoder7(nn.Module):
 class SkipAutoencoder7(nn.Module):
     def __init__(self, latent_dim=1960):
         super().__init__()
-        self.Skipencoder = SkipEncoder7(latent_dim)
-        self.Skipdecoder = SkipDecoder7(latent_dim)
+        self.encoder = SkipEncoder7(latent_dim)
+        self.decoder = SkipDecoder7(latent_dim)
 
     def forward(self, x):
-        z, x1, x2, x3 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, x1, x2, x3)
+        z, x1, x2, x3 = self.encoder(x)
+        out = self.decoder(z, x1, x2, x3)
         return out
 
 
@@ -668,12 +668,12 @@ class SkipDecoder8(nn.Module):
 class SkipAutoencoder8(nn.Module):
     def __init__(self, latent_dim=838):
         super().__init__()
-        self.Skipencoder = SkipEncoder8(latent_dim)
-        self.Skipdecoder = SkipDecoder8(latent_dim)
+        self.encoder = SkipEncoder8(latent_dim)
+        self.decoder = SkipDecoder8(latent_dim)
 
     def forward(self, x):
-        z, x1, x2 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, x1, x2)
+        z, x1, x2 = self.encoder(x)
+        out = self.decoder(z, x1, x2)
         return out
     
 ##########################################
@@ -755,10 +755,10 @@ class SkipDecoder9(nn.Module):
 class SkipAutoencoder9(nn.Module):
     def __init__(self, latent_dim=148):
         super().__init__()
-        self.Skipencoder = SkipEncoder9(latent_dim)
-        self.Skipdecoder = SkipDecoder9(latent_dim)
+        self.encoder = SkipEncoder9(latent_dim)
+        self.decoder = SkipDecoder9(latent_dim)
 
     def forward(self, x):
-        z, skip1, skip2, skip3, skip4, skip5 = self.Skipencoder(x)
-        out = self.Skipdecoder(z, skip1, skip2, skip3, skip4, skip5)
+        z, skip1, skip2, skip3, skip4, skip5 = self.encoder(x)
+        out = self.decoder(z, skip1, skip2, skip3, skip4, skip5)
         return out
