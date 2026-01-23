@@ -10,6 +10,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mlflow
 import mlflow.pytorch
+from pytorch_msssim import ssim
+
 
 from autoencoders import *
 from autoencoders_with_skip_connections import *
@@ -197,6 +199,27 @@ for dataset_name in datasets:
             plot_path = plot_reconstruction(
                 x, recon, model_name, dataset_name
             )
+            
+            test_ssim = 0.0
+
+            with torch.no_grad():
+                for images, _ in test_loader:
+                    images = images.to(device)
+                    outputs = model(images)
+
+                    images_dn = denormalize(images)
+                    outputs_dn = denormalize(outputs)
+
+                    test_ssim += ssim(
+                        outputs_dn,
+                        images_dn,
+                        data_range=1.0,
+                        size_average=True
+                    ).item()
+
+            test_ssim /= len(test_loader)
+
+            mlflow.log_metric("test_ssim", test_ssim)
 
             mlflow.log_artifact(plot_path, artifact_path="reconstructions")
 
@@ -211,3 +234,10 @@ for dataset_name in datasets:
                 mlflow.pytorch.log_model(model.decoder, "decoder")
 
             print(f"✓ {model_name} | {dataset_name} finalizado")
+
+            os.makedirs(f"models/{model_name}_{dataset_name}", exist_ok=True)
+
+            torch.save(model.state_dict(), f"models/{model_name}_{dataset_name}/autoencoder.pth")
+            torch.save(model.encoder.state_dict(), f"models/{model_name}_{dataset_name}/encoder.pth")
+            torch.save(model.decoder.state_dict(), f"models/{model_name}_{dataset_name}/decoder.pth")
+        
