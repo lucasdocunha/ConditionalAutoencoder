@@ -46,11 +46,14 @@ class CustomImageDataset(Dataset):
 # =========================
 # Utils
 # =========================
-def denormalize(image, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
-    mean = torch.tensor(mean).view(-1, 1, 1)
-    std = torch.tensor(std).view(-1, 1, 1)
-    image = image * std + mean
-    return torch.clamp(image, 0, 1)
+def denormalize(image, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
+    device = image.device
+
+    mean = torch.tensor(mean, device=device).view(1, -1, 1, 1)
+    std  = torch.tensor(std, device=device).view(1, -1, 1, 1)
+
+    return image * std + mean
+
 
 
 def plot_reconstruction(original, reconstructed, model_name, dataset_name, save_path="./results/"):
@@ -102,13 +105,13 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 datasets = ["CNR", "PKLot"]
 models = [
-    SkipAutoencoder0, SkipAutoencoder1, SkipAutoencoder2,
-    SkipAutoencoder3, SkipAutoencoder4, SkipAutoencoder5,
-    SkipAutoencoder6, SkipAutoencoder7, SkipAutoencoder8,
-    SkipAutoencoder9
+    Autoencoder0, Autoencoder1, Autoencoder2,
+    Autoencoder3, Autoencoder4, Autoencoder5,
+    Autoencoder6, Autoencoder7, Autoencoder8,
+    Autoencoder9
 ]
 
-num_epochs = 1
+num_epochs = 10
 batch_size = 32
 lr = 1e-3
 
