@@ -126,7 +126,11 @@ def train_experiment_autoencoder(
         }
 
         with torch.no_grad():
-            for images, _ in test_loader:
+            for i, (images, _) in enumerate(test_loader):
+
+                if i >= 2:
+                    break
+
                 images = images.to(device)
                 outputs = model(images)
 
@@ -139,11 +143,10 @@ def train_experiment_autoencoder(
 
                 for k in metrics_sum:
                     metrics_sum[k] += batch_metrics[k]
-
-        num_batches = len(test_loader)
+        
 
         metrics_avg = {
-            k: v / num_batches for k, v in metrics_sum.items()
+            k: float(np.mean(v)) for k, v in metrics_sum.items()
         }
         for name, value in metrics_avg.items():
             mlflow.log_metric(f"test_{name.lower()}", value)
