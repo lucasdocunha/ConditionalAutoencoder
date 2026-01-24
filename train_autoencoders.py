@@ -155,31 +155,44 @@ def train_experiment_autoencoder(
 
 
 def worker(rank, jobs_split):
-    
+    mlflow.set_tracking_uri(config.IP_LOCAL)
     torch.cuda.set_device(rank)
 
     my_jobs = jobs_split[rank]
 
     print(f"[GPU {rank}] recebeu {len(my_jobs)} jobs")
 
-    for model_class, dataset_name in my_jobs:
+    for model_class, dataset_name, epochs in my_jobs:
         train_experiment_autoencoder(
             gpu_id=rank,
             model_class=model_class,
             dataset_name=dataset_name,
             batch_size=32,
-            num_epochs=10,
+            num_epochs=epochs,
             lr=1e-3
         )
+        torch.cuda.empty_cache()
 
 if __name__ == "__main__":
+    import argpaser
+    
+    parser = argpaser.ArgumentParser()
+    parser.add_argument("-e", "--epochs", type=int, default=10, help="Número de épocas para treinamento")
+    
+    args = parser.parse_args()
+    
+    epochs = args.epochs
     config = Config()
-    mlflow.set_tracking_uri(config.IP_LOCAL)
+
     encoders = [
         Autoencoder0, Autoencoder1, Autoencoder2,
         Autoencoder3, Autoencoder4, Autoencoder5,
         Autoencoder6, Autoencoder7, Autoencoder8,
-        Autoencoder9
+        Autoencoder9,
+        SkipAutoencoder0, SkipAutoencoder1, SkipAutoencoder2,
+        SkipAutoencoder3, SkipAutoencoder4, SkipAutoencoder5,
+        SkipAutoencoder6, SkipAutoencoder7, SkipAutoencoder8,
+        SkipAutoencoder9
     ]
 
     jobs = []
@@ -187,7 +200,7 @@ if __name__ == "__main__":
 
     for dataset_encoder in ["CNR", "PKLot"]:
         for model in encoders:
-            jobs.append((model, dataset_encoder))
+            jobs.append((model, dataset_encoder, epochs))
 
     jobs_split = [jobs[i::n_procs] for i in range(n_procs)]
 
