@@ -119,7 +119,6 @@ def train_experiment_autoencoder(
         metrics_sum = {
             "MSE": 0.0,
             "SSIM": 0.0,
-            "MSSSIM": 0.0,
             "PSNR": 0.0,
             "NCC": 0.0,
             "VIF": 0.0,
