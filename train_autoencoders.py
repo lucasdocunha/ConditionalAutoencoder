@@ -200,7 +200,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     epochs = args.epochs
-    #config = Config()
 
     encoders = [
         Autoencoder0, Autoencoder1, Autoencoder2,
