@@ -9,3 +9,5 @@
 /weights
 *.ckpt
 /weights/*
+*.pyc
+*.png
