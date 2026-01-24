@@ -108,7 +108,7 @@ models = [
     Autoencoder0, Autoencoder1, Autoencoder2,
     Autoencoder3, Autoencoder4, Autoencoder5,
     Autoencoder6, Autoencoder7, Autoencoder8,
-    Autoencoder9
+    Autoencoder9, 
 ]
 
 num_epochs = 10
