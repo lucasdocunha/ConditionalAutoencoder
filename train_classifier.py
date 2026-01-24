@@ -1,67 +1,89 @@
+import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms
-import numpy as np
-from PIL import Image
-import os
-import pandas as pd
-import matplotlib.pyplot as plt
-import mlflow
+from torch.utils.data import DataLoader
+import mlflow 
 
-from src.models.classifier import Classifier
-from autoencoders import *
-from autoencoders_with_skip_connections import *
+from src.config import *
+from src.utils.datasets import CustomImageDataset
+from src.utils.transform import return_transform
+from src.models import *
 
 
-# =========================
-# Dataset
-# =========================
-class CustomImageDataset(Dataset):
-    def __init__(self, csv, transform=None, autoencoder=True):
-        self.df = pd.read_csv(csv)
-        self.transform = transform
-        self.autoencoder = autoencoder
 
-    def __len__(self):
-        return len(self.df)
 
-    def __getitem__(self, idx):
-        img_path = self.df.iloc[idx, 0]
-        image = Image.open(img_path).convert("RGB")
-        label = self.df.iloc[idx, 1]
+def train_experiment_autoencoder(
+    gpu_id=0, 
+    model_class=None, 
+    dataset_name=None,
+    batch_size=32,
+    num_epochs=10,
+    lr=1e-3
+):
+    pass  # Placeholder for potential future use
 
-        if self.transform:
-            image = self.transform(image)
+def worker(rank, jobs_split):
+    mlflow.set_tracking_uri(config.IP_LOCAL)
+    torch.cuda.set_device(rank)
 
-        if self.autoencoder:
-            label = image
+    my_jobs = jobs_split[rank]
 
-        return image, label
+    print(f"[GPU {rank}] recebeu {len(my_jobs)} jobs")
 
-# =========================
-# Transform
-# =========================
-transform = transforms.Compose([
-    transforms.Resize((128, 128)),
-    transforms.ToTensor(),
-    transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
+    for model_class, dataset_name, epochs in my_jobs:
+        train_experiment_autoencoder(
+            gpu_id=rank,
+            model_class=model_class,
+            dataset_name=dataset_name,
+            batch_size=32,
+            num_epochs=epochs,
+            lr=1e-3
+        )
+        torch.cuda.empty_cache()
+if __name__ == "__main__": 
+    import argpaser
+    
+    parser = argpaser.ArgumentParser()
+    parser.add_argument("-e", "--epochs", type=int, default=10, help="Número de épocas para treinamento")
+    
+    args = parser.parse_args()
+    
+    epochs = args.epochs
+    config = Config()
+
+    encoders = [
+        Encoder0, Encoder1, Encoder2,
+        Encoder3, Encoder4, Encoder5,
+        Encoder6, Encoder7, Encoder8,
+        Encoder9,
+        Encoder0, Encoder1, Encoder2,
+        Encoder3, Encoder4, Encoder5,
+        Encoder6, Encoder7, Encoder8,
+        Encoder9
+    ]
+
+    jobs = []
+    n_procs = len(config.DEVICES)
+
+    for dataset_encoder in ["CNR", "PKLot"]:
+        for model in encoders:
+            jobs.append((model, dataset_encoder, epochs))
+
+    jobs_split = [jobs[i::n_procs] for i in range(n_procs)]
+
+    mp.set_start_method("spawn", force=True)
+    mp.spawn(
+        worker,
+        args=(jobs_split,),
+        nprocs=n_procs,
+        join=True
     )
-])
+    
+    
 
+    
+    
 
-# =========================
-# MLflow setup
-# =========================
-mlflow.set_tracking_uri("http://127.0.0.1:5000")
-
-
-# =========================
-# Training loop
-# =========================
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 batche_sizes_csv = [64, 128, 256, 512, 1024]
