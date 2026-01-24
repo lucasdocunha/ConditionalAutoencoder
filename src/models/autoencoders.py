@@ -17,6 +17,7 @@ import torch.nn.functional as F
 class Encoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 8, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(8, 16, kernel_size=3, padding=1)
@@ -40,6 +41,7 @@ class Encoder0(nn.Module):
 class Decoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 32 * 32 * 16)
 
@@ -65,7 +67,7 @@ class Decoder0(nn.Module):
 class Autoencoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
-        latent_dim = latent_dim
+        self.latent_dim = latent_dim
         self.encoder = Encoder0(latent_dim)
         self.decoder = Decoder0(latent_dim)
 
@@ -140,7 +142,6 @@ class Decoder1(nn.Module):
 class Autoencoder1(nn.Module):
     def __init__(self, latent_dim=467):
         super().__init__()
-        latent_dim = latent_dim
         self.encoder = Encoder1(latent_dim)
         self.decoder = Decoder1(latent_dim)
 
@@ -154,6 +155,7 @@ class Autoencoder1(nn.Module):
 class Encoder2(nn.Module):
     def __init__(self, latent_dim=1411):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
@@ -187,6 +189,7 @@ class Encoder2(nn.Module):
 class Decoder2(nn.Module):
     def __init__(self, latent_dim=1411):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 16 * 16 * 16)
 
@@ -221,7 +224,7 @@ class Decoder2(nn.Module):
 class Autoencoder2(nn.Module):
     def __init__(self, latent_dim=1411):
         super().__init__()
-        latent_dim = latent_dim
+        self.latent_dim = latent_dim
         self.encoder = Encoder2(latent_dim)
         self.decoder = Decoder2(latent_dim)
 
@@ -236,6 +239,7 @@ class Autoencoder2(nn.Module):
 class Encoder3(nn.Module):
     def __init__(self, latent_dim=1674):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 8, kernel_size=3, padding=1)
@@ -258,6 +262,7 @@ class Encoder3(nn.Module):
 class Decoder3(nn.Module):
     def __init__(self, latent_dim=1674):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 8 * 32 * 32)
 
@@ -283,7 +288,7 @@ class Decoder3(nn.Module):
 class Autoencoder3(nn.Module):
     def __init__(self, latent_dim=1674):
         super().__init__()
-        latent_dim = latent_dim
+        self.latent_dim = latent_dim
         self.encoder = Encoder3(latent_dim)
         self.decoder = Decoder3(latent_dim)
 
@@ -371,7 +376,6 @@ class Decoder4(nn.Module):
 class Autoencoder4(nn.Module):
     def __init__(self, latent_dim=562):
         super().__init__()
-        latent_dim = latent_dim
         self.encoder = Encoder4(latent_dim)
         self.decoder = Decoder4(latent_dim)
 
@@ -439,7 +443,6 @@ class Decoder5(nn.Module):
 class Autoencoder5(nn.Module):
     def __init__(self, latent_dim=685):
         super().__init__()
-        latent_dim = latent_dim
         self.encoder = Encoder5(latent_dim)
         self.decoder = Decoder5(latent_dim)
 
@@ -453,6 +456,7 @@ class Autoencoder5(nn.Module):
 class Encoder6(nn.Module):
     def __init__(self, latent_dim=1262):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(16, 64, kernel_size=3, padding=1)
@@ -476,6 +480,7 @@ class Encoder6(nn.Module):
 class Decoder6(nn.Module):
     def __init__(self, latent_dim=1262):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 32 * 32 * 64)
 
@@ -500,7 +505,7 @@ class Decoder6(nn.Module):
 class Autoencoder6(nn.Module):
     def __init__(self, latent_dim=1262):
         super().__init__()
-        latent_dim = latent_dim
+        self.latent_dim = latent_dim
         self.encoder = Encoder6(latent_dim)
         self.decoder = Decoder6(latent_dim)
 
@@ -514,6 +519,7 @@ class Autoencoder6(nn.Module):
 class Encoder7(nn.Module):
     def __init__(self, latent_dim=1960):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 128, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(128, 32, kernel_size=3, padding=1)
@@ -537,6 +543,7 @@ class Encoder7(nn.Module):
 class Decoder7(nn.Module):
     def __init__(self, latent_dim=1960):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 64 * 64 * 16)
 
@@ -562,7 +569,7 @@ class Decoder7(nn.Module):
 class Autoencoder7(nn.Module):
     def __init__(self, latent_dim=1960):
         super().__init__()
-        latent_dim = latent_dim
+        self.latent_dim = latent_dim
         self.encoder = Encoder7(latent_dim)
         self.decoder = Decoder7(latent_dim)
 
@@ -622,7 +629,6 @@ class Decoder8(nn.Module):
 class Autoencoder8(nn.Module):
     def __init__(self, latent_dim=838):
         super().__init__()
-        latent_dim = latent_dim
         self.encoder = Encoder8(latent_dim)
         self.decoder = Decoder8(latent_dim)
 
@@ -635,6 +641,7 @@ class Autoencoder8(nn.Module):
 class Encoder9(nn.Module):
     def __init__(self, latent_dim=148):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(16, 8, kernel_size=3, padding=1)
@@ -667,6 +674,7 @@ class Encoder9(nn.Module):
 class Decoder9(nn.Module):
     def __init__(self, latent_dim=148):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 4 * 4 * 32)
 
@@ -700,7 +708,7 @@ class Decoder9(nn.Module):
 class Autoencoder9(nn.Module):
     def __init__(self, latent_dim=148):
         super().__init__()
-        latent_dim = latent_dim
+        self.latent_dim = latent_dim
         self.encoder = Encoder9(latent_dim)
         self.decoder = Decoder9(latent_dim)
 

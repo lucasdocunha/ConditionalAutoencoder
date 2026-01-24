@@ -116,6 +116,7 @@ def train_experiment_autoencoder(
         )
         mlflow.log_artifact(plot_path, artifact_path="reconstructions")
 
+
         metrics_sum = {
             "MSE": 0.0,
             "SSIM": 0.0,
