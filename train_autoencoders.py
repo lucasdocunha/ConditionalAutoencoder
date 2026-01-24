@@ -4,15 +4,18 @@ from torch.utils.data import DataLoader
 import os 
 import mlflow 
 import mlflow.pytorch
-from pytorch_msssim import ssim
 import torch.multiprocessing as mp
+import torch.nn.functional as F
+from torchmetrics.functional import peak_signal_noise_ratio
+import sewar.full_ref
+
 
 from src.config import *
 from src.utils.datasets import CustomImageDataset
 from src.utils.plot import plot_reconstruction, denormalize
 from src.utils.transform import return_transform
 from src.models import *
-
+from src.utils.image_metrics import calculate_all_metrics_torch
 
 def train_experiment_autoencoder(
     gpu_id=0, 
@@ -111,29 +114,41 @@ def train_experiment_autoencoder(
         plot_path = plot_reconstruction(
             x, recon, model_name, dataset_name
         )
-        
-        test_ssim = 0.0
+        mlflow.log_artifact(plot_path, artifact_path="reconstructions")
+
+        metrics_sum = {
+            "MSE": 0.0,
+            "SSIM": 0.0,
+            "MSSSIM": 0.0,
+            "PSNR": 0.0,
+            "NCC": 0.0,
+            "VIF": 0.0,
+            "SCC": 0.0
+        }
 
         with torch.no_grad():
             for images, _ in test_loader:
                 images = images.to(device)
                 outputs = model(images)
 
-                images_dn = denormalize(images)
-                outputs_dn = denormalize(outputs)
+                images_dn = torch.clamp(denormalize(images), 0, 1)
+                outputs_dn = torch.clamp(denormalize(outputs), 0, 1)
 
-                test_ssim += ssim(
-                    outputs_dn,
-                    images_dn,
-                    data_range=1.0,
-                    size_average=True
-                ).item()
+                batch_metrics = calculate_all_metrics_torch(
+                    images_dn, outputs_dn
+                )
 
-        test_ssim /= len(test_loader)
+                for k in metrics_sum:
+                    metrics_sum[k] += batch_metrics[k]
 
-        mlflow.log_metric("test_ssim", test_ssim)
+        num_batches = len(test_loader)
 
-        mlflow.log_artifact(plot_path, artifact_path="reconstructions")
+        metrics_avg = {
+            k: v / num_batches for k, v in metrics_sum.items()
+        }
+        for name, value in metrics_avg.items():
+            mlflow.log_metric(f"test_{name.lower()}", value)
+
 
         # -------------------------
         # Models
