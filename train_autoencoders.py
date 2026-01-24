@@ -25,7 +25,7 @@ def train_experiment_autoencoder(
     num_epochs=10,
     lr=1e-3
 ):
-    device = config.DEVICES[gpu_id]
+    device = Config.DEVICES[gpu_id]
     torch.cuda.set_device(device)
 
     
@@ -120,7 +120,6 @@ def train_experiment_autoencoder(
         metrics_sum = {
             "MSE": 0.0,
             "SSIM": 0.0,
-            "MSSSIM": 0.0,
             "PSNR": 0.0,
             "NCC": 0.0,
             "VIF": 0.0,
@@ -171,7 +170,7 @@ def train_experiment_autoencoder(
 
 
 def worker(rank, jobs_split):
-    mlflow.set_tracking_uri(config.IP_LOCAL)
+    mlflow.set_tracking_uri(Config.IP_LOCAL)
     torch.cuda.set_device(rank)
 
     my_jobs = jobs_split[rank]
@@ -190,15 +189,15 @@ def worker(rank, jobs_split):
         torch.cuda.empty_cache()
 
 if __name__ == "__main__":
-    import argpaser
+    import argparse
     
-    parser = argpaser.ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--epochs", type=int, default=10, help="Número de épocas para treinamento")
     
     args = parser.parse_args()
     
     epochs = args.epochs
-    config = Config()
+    #config = Config()
 
     encoders = [
         Autoencoder0, Autoencoder1, Autoencoder2,
@@ -212,7 +211,7 @@ if __name__ == "__main__":
     ]
 
     jobs = []
-    n_procs = len(config.DEVICES)
+    n_procs = len(Config.DEVICES)
 
     for dataset_encoder in ["CNR", "PKLot"]:
         for model in encoders:
