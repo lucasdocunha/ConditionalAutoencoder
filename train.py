@@ -109,9 +109,13 @@ models = [
     Autoencoder3, Autoencoder4, Autoencoder5,
     Autoencoder6, Autoencoder7, Autoencoder8,
     Autoencoder9, 
+    SkipAutoencoder0, SkipAutoencoder1, SkipAutoencoder2,
+    SkipAutoencoder3, SkipAutoencoder4, SkipAutoencoder5,
+    SkipAutoencoder6, SkipAutoencoder7, SkipAutoencoder8,
+    SkipAutoencoder9
 ]
 
-num_epochs = 10
+num_epochs = 2
 batch_size = 32
 lr = 1e-3
 

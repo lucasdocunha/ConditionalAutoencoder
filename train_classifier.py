@@ -83,7 +83,7 @@ for dataset_encoder in datasets_encoder:
     for model_encoder in encoders:
         
         encoder = model_encoder().to(device)
-        encoder.load_state_dict(torch.load(f"models/{model_encoder.__name__}_{dataset_encoder}/encoder.pth", map_location=device))
+        encoder.load_state_dict(torch.load(f"models/Autoencoder{model_encoder.__name__[-1]}_{dataset_encoder}/encoder.pth", map_location=device))
         
         for p in encoder.parameters():
             p.requires_grad = False
