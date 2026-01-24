@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import mlflow
 
-from classifier import Classifier
+from src.models.classifier import Classifier
 from autoencoders import *
 from autoencoders_with_skip_connections import *
 
