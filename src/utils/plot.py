@@ -34,47 +34,63 @@ def plot_reconstruction(original, reconstructed, model_name, dataset_name, save_
     plt.savefig(filename, dpi=100, bbox_inches="tight")
     plt.close()
     return filename
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import mlflow
 
 def log_confusion_matrix_mlflow(
     y_true,
     y_pred,
     class_names=None,
     title="Confusion Matrix",
+    artifact_name="confusion_matrix.png",
+    normalize=False
 ):
     """
-    Plota e salva uma confusion matrix no MLflow (artifact),
-    usando apenas matplotlib.
-
-    Args:
-        y_true (array-like): rótulos verdadeiros
-        y_pred (array-like): rótulos preditos
-        class_names (list[str], optional): nomes das classes
-        title (str): título do gráfico
-        artifact_name (str): nome do arquivo no MLflow
+    Confusion Matrix em tons de azul (estilo seaborn heatmap),
+    usando apenas matplotlib e salvando no MLflow.
     """
     cm = confusion_matrix(y_true, y_pred)
 
-    fig, ax = plt.subplots(figsize=(5, 5))
-    ax.imshow(cm)
+    if normalize:
+        cm = cm.astype("float") / cm.sum(axis=1, keepdims=True)
 
-    ax.set_title(title)
-    ax.set_xlabel("Predicted label")
-    ax.set_ylabel("True label")
+    fig, ax = plt.subplots(figsize=(6, 5))
+    im = ax.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
+
+    ax.set_title(title, fontsize=14)
+    ax.set_xlabel("Predicted label", fontsize=12)
+    ax.set_ylabel("True label", fontsize=12)
 
     ax.set_xticks(np.arange(cm.shape[1]))
     ax.set_yticks(np.arange(cm.shape[0]))
 
     if class_names is not None:
-        ax.set_xticklabels(class_names)
+        ax.set_xticklabels(class_names, rotation=45, ha="right")
         ax.set_yticklabels(class_names)
+
+    # colorbar (igual seaborn)
+    cbar = ax.figure.colorbar(im, ax=ax)
+    cbar.ax.set_ylabel("Count" if not normalize else "Proportion", rotation=-90, va="bottom")
+
+    # valores nas células (com contraste automático)
+    thresh = cm.max() / 2.0
+    fmt = ".2f" if normalize else "d"
 
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            ax.text(j, i, cm[i, j],
-                    ha="center", va="center")
+            ax.text(
+                j, i, format(cm[i, j], fmt),
+                ha="center", va="center",
+                color="white" if cm[i, j] > thresh else "black",
+                fontsize=11
+            )
 
+    ax.set_ylim(len(cm) - 0.5, -0.5)  # corrige corte do matplotlib
     plt.tight_layout()
 
+    mlflow.log_figure(fig, artifact_name)
     plt.close(fig)
 
-    return fig
+    return cm
