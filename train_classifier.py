@@ -170,8 +170,7 @@ def train_classifier(
                     y_true=y_true,
                     y_pred=y_pred,
                     class_names=["empty", "occupied"],
-                    title=f"Confusion Matrix - {model_name} - {test_dataset_name}",
-                    artifact_name=f"confusion_matrix_{test_dataset_name}.png"
+                    title=f"Confusion Matrix - {model_name} - {test_dataset_name}"
                 )
 
                 mlflow.log_figure(cm, f"confusion_matrix_{test_dataset_name}.png")
@@ -216,10 +215,6 @@ if __name__ == "__main__":
     epochs = args.epochs
 
     encoders = [
-        Encoder0, Encoder1, Encoder2,
-        Encoder3, Encoder4, Encoder5,
-        Encoder6, Encoder7, Encoder8,
-        Encoder9,
         Encoder0, Encoder1, Encoder2,
         Encoder3, Encoder4, Encoder5,
         Encoder6, Encoder7, Encoder8,
