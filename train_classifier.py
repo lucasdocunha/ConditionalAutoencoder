@@ -11,6 +11,7 @@ from src.utils.transform import return_transform
 from src.models import *
 from src.utils.plot import log_confusion_matrix_mlflow
 from sklearn.metrics import accuracy_score, precision_score, f1_score
+from tqdm import tqdm
 
 
 
@@ -77,7 +78,12 @@ def train_classifier(
             criterion = nn.CrossEntropyLoss()
             optimizer = torch.optim.Adam(model.parameters(), lr=lr)
             
-            for epoch in range(num_epochs):
+            for epoch in tqdm(
+                range(num_epochs),
+                desc=f"[GPU {gpu_id}] Epochs",
+                position=gpu_id,
+                leave=False
+            ):
                 model.train()
                 train_loss = 0.0
                 train_correct = 0
@@ -129,7 +135,12 @@ def train_classifier(
                 mlflow.log_metric("val_loss", val_loss, step=epoch)
                 mlflow.log_metric("val_acc", val_acc, step=epoch)
 
-            for test_dataset_name in datasets_test:
+            for test_dataset_name in tqdm(
+                    datasets_test,
+                    desc=f"[GPU {gpu_id}] Test datasets",
+                    position=gpu_id,
+                    leave=False
+                ):
 
                 y_true = []
                 y_pred = []
