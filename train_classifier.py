@@ -166,14 +166,14 @@ def train_classifier(
                 mlflow.log_metric(f"test_precision-{test_dataset_name}", precision)
                 mlflow.log_metric(f"test_f1-{test_dataset_name}", f1)
 
-                cm = log_confusion_matrix_mlflow(
-                    y_true=y_true,
-                    y_pred=y_pred,
-                    class_names=["empty", "occupied"],
-                    title=f"Confusion Matrix - {model_name} - {test_dataset_name}"
+                log_confusion_matrix_mlflow(
+                    y_true,
+                    y_pred,
+                    class_names=None,
+                    title="Confusion Matrix",
+                    artifact_name=f"confusion_matrix/{test_dataset_name}/{batch_size_csv}.png",
+                    normalize=False
                 )
-
-                mlflow.log_figure(cm, f"confusion_matrix_{test_dataset_name}.png")
 
             mlflow.pytorch.log_model(model, "classifier")
 
@@ -209,17 +209,39 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--epochs", type=int, default=10, help="Número de épocas para treinamento")
+    parser.add_argument("-c", "--encoders", type=str, default='all', help="Lista de encoders para usar")
     
     args = parser.parse_args()
     
     epochs = args.epochs
+    type_encoders = args.encoders
 
-    encoders = [
-        Encoder0, Encoder1, Encoder2,
-        Encoder3, Encoder4, Encoder5,
-        Encoder6, Encoder7, Encoder8,
-        Encoder9
-    ]
+    if type_encoders == 'all':
+        encoders = [
+            Autoencoder0, Autoencoder1, Autoencoder2,
+            Autoencoder3, Autoencoder4, Autoencoder5,
+            Autoencoder6, Autoencoder7, Autoencoder8,
+            Autoencoder9,
+            SkipAutoencoder0, SkipAutoencoder1, SkipAutoencoder2,
+            SkipAutoencoder3, SkipAutoencoder4, SkipAutoencoder5,
+            SkipAutoencoder6, SkipAutoencoder7, SkipAutoencoder8,
+            SkipAutoencoder9
+        ]
+    elif type_encoders == 'skip':
+        encoders = [
+            SkipAutoencoder0, SkipAutoencoder1, SkipAutoencoder2,
+            SkipAutoencoder3, SkipAutoencoder4, SkipAutoencoder5,
+            SkipAutoencoder6, SkipAutoencoder7, SkipAutoencoder8,
+            SkipAutoencoder9
+        ]
+    
+    elif type_encoders == 'ae':
+        encoders = [
+            Autoencoder0, Autoencoder1, Autoencoder2,
+            Autoencoder3, Autoencoder4, Autoencoder5,
+            Autoencoder6, Autoencoder7, Autoencoder8,
+            Autoencoder9
+        ]
 
     datasets_classifier = ["PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
     
