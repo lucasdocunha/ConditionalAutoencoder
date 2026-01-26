@@ -9,7 +9,8 @@ from src.config import *
 from src.utils.datasets import CustomImageDataset
 from src.utils.transform import return_transform
 from src.models import *
-
+from src.utils.plot import log_confusion_matrix_mlflow
+from sklearn.metrics import accuracy_score, precision_score, f1_score
 
 
 
@@ -28,18 +29,19 @@ def train_classifier(
     datasets_test = ["CNR", "PKLot", "PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
     transform = return_transform()
     
-    
-            
-    encoder = model_encoder().to(device)
-    encoder.load_state_dict(torch.load(f"models/Autoencoder{model_encoder.__name__[-1]}_{dataset_encoder_name}/encoder.pth", map_location=device))
-    
-    for p in encoder.parameters():
-        p.requires_grad = False
-
-    latent_dim = encoder.latent_dim        
+    mlflow.set_experiment(f"Classifier_{model_encoder.__name__[-1]}")        
+          
     for batch_size_csv in batche_sizes_csv:
-        model = Classifier(encoder, latent_dim=latent_dim, num_classes=2).to(device)
+        encoder = model_encoder().to(device)
+        encoder.load_state_dict(torch.load(f"models/Autoencoder{model_encoder.__name__[-1]}_{dataset_encoder_name}/encoder.pth", map_location=device))
+        
+        for p in encoder.parameters():
+            p.requires_grad = False
 
+        latent_dim = encoder.latent_dim
+          
+        model = Classifier(encoder, latent_dim=latent_dim, num_classes=2).to(device)
+        
         train_dataset = CustomImageDataset(
             f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{dataset_classifier_name}/batches/{batch_size_csv}.csv",
             transform=transform,
@@ -126,24 +128,53 @@ def train_classifier(
                 mlflow.log_metric("val_acc", val_acc, step=epoch)
 
             for test_dataset_name in datasets_test:
-                
+
+                y_true = []
+                y_pred = []
+
                 test_dataset = CustomImageDataset(
                     f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{test_dataset_name}/{test_dataset_name}_test.csv",
                     transform=transform,
                     autoencoder=False
                 )
-                test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
+                test_loader = DataLoader(
+                    test_dataset,
+                    batch_size=batch_size,
+                    shuffle=False
+                )
+
+                model.eval()
                 with torch.no_grad():
                     for x, y in test_loader:
-                        x, y = x.to(device), y.to(device)
+                        x = x.to(device)
+                        y = y.to(device)
+
                         out = model(x)
-
                         preds = torch.argmax(out, dim=1)
-                        test_correct += (preds == y).sum().item()
-                        test_total += y.size(0)
 
-                test_acc = test_correct / test_total
-                mlflow.log_metric(f"test_acc-{test_dataset_name}", test_acc)
+                        y_true.extend(y.cpu().numpy())
+                        y_pred.extend(preds.cpu().numpy())
+
+                # métricas
+                acc = accuracy_score(y_true, y_pred)
+                precision = precision_score(y_true, y_pred, average="binary")
+                f1 = f1_score(y_true, y_pred, average="binary")
+
+                # log no MLflow
+                mlflow.log_metric(f"test_acc-{test_dataset_name}", acc)
+                mlflow.log_metric(f"test_precision-{test_dataset_name}", precision)
+                mlflow.log_metric(f"test_f1-{test_dataset_name}", f1)
+
+                cm = log_confusion_matrix_mlflow(
+                    y_true=y_true,
+                    y_pred=y_pred,
+                    class_names=["empty", "occupied"],
+                    title=f"Confusion Matrix - {model_name} - {test_dataset_name}",
+                    artifact_name=f"confusion_matrix_{test_dataset_name}.png"
+                )
+
+                mlflow.log_figure(cm, f"confusion_matrix_{test_dataset_name}.png")
 
             mlflow.pytorch.log_model(model, "classifier")
 
