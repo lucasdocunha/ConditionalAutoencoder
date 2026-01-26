@@ -26,7 +26,7 @@ def train_classifier(
 ):
     device = Config.DEVICES[gpu_id]
     batche_sizes_csv = [64, 128, 256, 512, 1024]
-    datasets_test = ["CNR", "PKLot", "PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
+    datasets_test = ["PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
     transform = return_transform()
     
     mlflow.set_experiment(f"Classifier_{model_encoder.__name__[-1]}")        
@@ -43,7 +43,7 @@ def train_classifier(
         model = Classifier(encoder, latent_dim=latent_dim, num_classes=2).to(device)
         
         train_dataset = CustomImageDataset(
-            f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{dataset_classifier_name}/batches/{batch_size_csv}.csv",
+            f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{dataset_classifier_name}/batches/batch-{batch_size_csv}.csv",
             transform=transform,
             autoencoder=False
         )
@@ -185,7 +185,7 @@ def train_classifier(
             torch.save(model.state_dict(), f"models/{model_name}_{dataset_classifier_name}/classifier-{batch_size_csv}.pth")
 
 def worker(rank, jobs_split):
-    mlflow.set_tracking_uri(config.IP_LOCAL)
+    mlflow.set_tracking_uri(Config.IP_LOCAL)
     torch.cuda.set_device(rank)
 
     my_jobs = jobs_split[rank]
@@ -193,6 +193,7 @@ def worker(rank, jobs_split):
     print(f"[GPU {rank}] recebeu {len(my_jobs)} jobs")
 
     for model_encoder, dataset_encoder, dataset_classifier, epochs in my_jobs:
+        print("dataset de classifier: ", dataset_classifier)
         train_classifier(
             gpu_id=rank,
             model_encoder=model_encoder,
@@ -205,15 +206,14 @@ def worker(rank, jobs_split):
         torch.cuda.empty_cache()
         
 if __name__ == "__main__": 
-    import argpaser
+    import argparse
     
-    parser = argpaser.ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--epochs", type=int, default=10, help="Número de épocas para treinamento")
     
     args = parser.parse_args()
     
     epochs = args.epochs
-    config = Config()
 
     encoders = [
         Encoder0, Encoder1, Encoder2,
@@ -226,10 +226,10 @@ if __name__ == "__main__":
         Encoder9
     ]
 
-    datasets_classifier = ["CNR", "PKLot", "PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
+    datasets_classifier = ["PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
     
     jobs = []
-    n_procs = len(config.DEVICES)
+    n_procs = len(Config.DEVICES)
 
     for dataset_encoder in ["CNR", "PKLot"]:                
         for model in encoders:
