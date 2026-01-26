@@ -20,6 +20,7 @@ import mlflow
 class SkipEncoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 8, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(8, 16, kernel_size=3, padding=1)
@@ -43,6 +44,7 @@ class SkipEncoder0(nn.Module):
 class SkipDecoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 32 * 32 * 16)
 
@@ -70,6 +72,7 @@ class SkipDecoder0(nn.Module):
 class SkipAutoencoder0(nn.Module):
     def __init__(self, latent_dim=1849):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder0(latent_dim)
         self.decoder = SkipDecoder0(latent_dim)
 
@@ -82,6 +85,7 @@ class SkipAutoencoder0(nn.Module):
 class SkipEncoder1(nn.Module):
     def __init__(self, latent_dim=467):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 8, kernel_size=3, padding=1)
@@ -112,6 +116,7 @@ class SkipEncoder1(nn.Module):
 class SkipDecoder1(nn.Module):
     def __init__(self, latent_dim=467):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 16 * 16 * 32)
 
@@ -146,6 +151,7 @@ class SkipDecoder1(nn.Module):
 class SkipAutoencoder1(nn.Module):
     def __init__(self, latent_dim=467):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder1(latent_dim)
         self.decoder = SkipDecoder1(latent_dim)
 
@@ -159,6 +165,7 @@ class SkipAutoencoder1(nn.Module):
 class SkipEncoder2(nn.Module):
     def __init__(self, latent_dim=1411):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
@@ -192,6 +199,7 @@ class SkipEncoder2(nn.Module):
 class SkipDecoder2(nn.Module):
     def __init__(self, latent_dim=1411):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 16 * 16 * 16)
 
@@ -233,6 +241,7 @@ class SkipDecoder2(nn.Module):
 class SkipAutoencoder2(nn.Module):
     def __init__(self, latent_dim=1411):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder2(latent_dim)
         self.decoder = SkipDecoder2(latent_dim)
 
@@ -247,6 +256,7 @@ class SkipAutoencoder2(nn.Module):
 class SkipEncoder3(nn.Module):
     def __init__(self, latent_dim=1674):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 8, kernel_size=3, padding=1)
@@ -269,6 +279,7 @@ class SkipEncoder3(nn.Module):
 class SkipDecoder3(nn.Module):
     def __init__(self, latent_dim=1674):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 8 * 32 * 32)
 
@@ -297,6 +308,7 @@ class SkipDecoder3(nn.Module):
 class SkipAutoencoder3(nn.Module):
     def __init__(self, latent_dim=1674):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder3(latent_dim)
         self.decoder = SkipDecoder3(latent_dim)
 
@@ -309,6 +321,7 @@ class SkipAutoencoder3(nn.Module):
 class SkipEncoder4(nn.Module):
     def __init__(self, latent_dim=562):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(64, 16, kernel_size=3, padding=1)
@@ -349,6 +362,7 @@ class SkipEncoder4(nn.Module):
 class SkipDecoder4(nn.Module):
     def __init__(self, latent_dim=562):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 4 * 4 * 16)
 
@@ -397,6 +411,7 @@ class SkipDecoder4(nn.Module):
 class SkipAutoencoder4(nn.Module):
     def __init__(self, latent_dim=562):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder4(latent_dim)
         self.decoder = SkipDecoder4(latent_dim)
 
@@ -410,6 +425,7 @@ class SkipAutoencoder4(nn.Module):
 class SkipEncoder5(nn.Module):
     def __init__(self, latent_dim=685):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(16, 128, kernel_size=3, padding=1)
@@ -437,6 +453,7 @@ class SkipEncoder5(nn.Module):
 class SkipDecoder5(nn.Module):
     def __init__(self, latent_dim=685):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 8 * 16 * 16)
 
@@ -470,6 +487,7 @@ class SkipDecoder5(nn.Module):
 class SkipAutoencoder5(nn.Module):
     def __init__(self, latent_dim=685):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder5(latent_dim)
         self.decoder = SkipDecoder5(latent_dim)
 
@@ -483,6 +501,7 @@ class SkipAutoencoder5(nn.Module):
 class SkipEncoder6(nn.Module):
     def __init__(self, latent_dim=1262):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(16, 64, kernel_size=3, padding=1)
@@ -506,6 +525,7 @@ class SkipEncoder6(nn.Module):
 class SkipDecoder6(nn.Module):
     def __init__(self, latent_dim=1262):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 32 * 32 * 64)
 
@@ -534,6 +554,7 @@ class SkipDecoder6(nn.Module):
 class SkipAutoencoder6(nn.Module):
     def __init__(self, latent_dim=1262):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder6(latent_dim)
         self.decoder = SkipDecoder6(latent_dim)
 
@@ -547,6 +568,7 @@ class SkipAutoencoder6(nn.Module):
 class SkipEncoder7(nn.Module):
     def __init__(self, latent_dim=1960):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 128, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(128, 32, kernel_size=3, padding=1)
@@ -572,6 +594,7 @@ class SkipEncoder7(nn.Module):
 class SkipDecoder7(nn.Module):
     def __init__(self, latent_dim=1960):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 16 * 16 * 16)
 
@@ -605,6 +628,7 @@ class SkipDecoder7(nn.Module):
 class SkipAutoencoder7(nn.Module):
     def __init__(self, latent_dim=1960):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder7(latent_dim)
         self.decoder = SkipDecoder7(latent_dim)
 
@@ -618,6 +642,7 @@ class SkipAutoencoder7(nn.Module):
 class SkipEncoder8(nn.Module):
     def __init__(self, latent_dim=838):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
@@ -640,6 +665,7 @@ class SkipEncoder8(nn.Module):
 class SkipDecoder8(nn.Module):
     def __init__(self, latent_dim=838):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 32 * 32 * 128)
 
@@ -668,6 +694,7 @@ class SkipDecoder8(nn.Module):
 class SkipAutoencoder8(nn.Module):
     def __init__(self, latent_dim=838):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder8(latent_dim)
         self.decoder = SkipDecoder8(latent_dim)
 
@@ -680,6 +707,7 @@ class SkipAutoencoder8(nn.Module):
 class SkipEncoder9(nn.Module):
     def __init__(self, latent_dim=148):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(16, 8, kernel_size=3, padding=1)
@@ -712,6 +740,7 @@ class SkipEncoder9(nn.Module):
 class SkipDecoder9(nn.Module):
     def __init__(self, latent_dim=148):
         super().__init__()
+        self.latent_dim = latent_dim
 
         self.fc = nn.Linear(latent_dim, 4 * 4 * 32)
 
@@ -755,6 +784,7 @@ class SkipDecoder9(nn.Module):
 class SkipAutoencoder9(nn.Module):
     def __init__(self, latent_dim=148):
         super().__init__()
+        self.latent_dim = latent_dim
         self.encoder = SkipEncoder9(latent_dim)
         self.decoder = SkipDecoder9(latent_dim)
 
