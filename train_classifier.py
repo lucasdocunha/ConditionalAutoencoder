@@ -33,6 +33,8 @@ def train_classifier(
           
     for batch_size_csv in batche_sizes_csv:
         encoder = model_encoder().to(device)
+        
+
         encoder.load_state_dict(torch.load(f"models/Autoencoder{model_encoder.__name__[-1]}_{dataset_encoder_name}/encoder.pth", map_location=device))
         
         for p in encoder.parameters():
@@ -218,29 +220,29 @@ if __name__ == "__main__":
 
     if type_encoders == 'all':
         encoders = [
-            Autoencoder0, Autoencoder1, Autoencoder2,
-            Autoencoder3, Autoencoder4, Autoencoder5,
-            Autoencoder6, Autoencoder7, Autoencoder8,
-            Autoencoder9,
-            SkipAutoencoder0, SkipAutoencoder1, SkipAutoencoder2,
-            SkipAutoencoder3, SkipAutoencoder4, SkipAutoencoder5,
-            SkipAutoencoder6, SkipAutoencoder7, SkipAutoencoder8,
-            SkipAutoencoder9
+            Encoder0, Encoder1, Encoder2,
+            Encoder3, Encoder4, Encoder5,
+            Encoder6, Encoder7, Encoder8,
+            Encoder9,
+            SkipEncoder0, SkipEncoder1, SkipEncoder2,
+            SkipEncoder3, SkipEncoder4, SkipEncoder5,
+            SkipEncoder6, SkipEncoder7, SkipEncoder8,
+            SkipEncoder9
         ]
     elif type_encoders == 'skip':
         encoders = [
-            SkipAutoencoder0, SkipAutoencoder1, SkipAutoencoder2,
-            SkipAutoencoder3, SkipAutoencoder4, SkipAutoencoder5,
-            SkipAutoencoder6, SkipAutoencoder7, SkipAutoencoder8,
-            SkipAutoencoder9
+            SkipEncoder0, SkipEncoder1, SkipEncoder2,
+            SkipEncoder3, SkipEncoder4, SkipEncoder5,
+            SkipEncoder6, SkipEncoder7, SkipEncoder8,
+            SkipEncoder9
         ]
     
     elif type_encoders == 'ae':
         encoders = [
-            Autoencoder0, Autoencoder1, Autoencoder2,
-            Autoencoder3, Autoencoder4, Autoencoder5,
-            Autoencoder6, Autoencoder7, Autoencoder8,
-            Autoencoder9
+            Encoder0, Encoder1, Encoder2,
+            Encoder3, Encoder4, Encoder5,
+            Encoder6, Encoder7, Encoder8,
+            Encoder9
         ]
 
     datasets_classifier = ["PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]

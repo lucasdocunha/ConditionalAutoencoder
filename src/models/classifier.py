@@ -16,7 +16,7 @@ class Classifier(nn.Module):
         self.fc3 = nn.Linear(128, num_classes)
 
     def forward(self, x):
-        z = self.encoder(x)      # saída do encoder
+        z = self.encoder(x)[0]      # saída do encoder
         z = self.dropout(z)
         z = F.relu(self.fc1(z))
         z = F.relu(self.fc2(z))
