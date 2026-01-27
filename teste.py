@@ -1,20 +1,13 @@
 import os
 import tempfile
+import pandas as pd 
 
 for root, _, files in os.walk("CSV"):
-    for f in files:
-        if f.endswith(".csv"):
-            caminho = os.path.join(root, f)
+    for file in files:
+        if file.endswith(".csv"):
+            data = pd.read_csv(os.path.join(root, file))
 
-            with open(caminho, "r", encoding="utf-8") as fin, \
-                 tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8") as fout:
-
-                for linha in fin:
-                    fout.write(
-                        linha.replace(
-                            "/workspace",
-                            "/home/lucas.ocunha/DeepLearning"
-                        )
-                    )
-
-            os.replace(fout.name, caminho)
+            files = data.iloc[:, 0].tolist()
+            for f in files:
+                if not os.path.isfile(f):
+                    print(f"Missing file: {f} in CSV: {os.path.join(root, file)}")

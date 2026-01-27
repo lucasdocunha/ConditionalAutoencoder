@@ -26,7 +26,7 @@ def train_classifier(
     lr=1e-3
 ):
     device = Config.DEVICES[gpu_id]
-    batche_sizes_csv = [64, 128, 256, 512, 1024]
+    batche_sizes_csv = [256, 512, 1024]
     datasets_test = ["PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
     transform = return_transform()
     
@@ -159,7 +159,7 @@ def train_classifier(
 
                 model.eval()
                 with torch.no_grad():
-                    for x, y in test_loader:
+                    for x, y in tqdm(test_loader):
                         x = x.to(device)
                         y = y.to(device)
 

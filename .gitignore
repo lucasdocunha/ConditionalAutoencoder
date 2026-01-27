@@ -11,3 +11,7 @@
 /weights/*
 *.pyc
 *.png
+*.tar
+*.tar.gz
+*.gz
+/PKLot
