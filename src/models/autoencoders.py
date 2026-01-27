@@ -315,7 +315,7 @@ class Encoder4(nn.Module):
         self.pool = nn.MaxPool2d(2, 2)
 
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(16 * 4 * 4, self..latent_dim)
+        self.fc = nn.Linear(16 * 4 * 4, self.latent_dim)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))  

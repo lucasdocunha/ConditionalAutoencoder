@@ -170,29 +170,28 @@ def train_experiment_autoencoder(
 
 
 def worker(rank, jobs_split):
-    num_gpus = len(Config.DEVICES)
-    gpu_id = rank % num_gpus
+    NUM_GPUS = len(Config.DEVICES)
+    gpu_id = rank % NUM_GPUS
+
+    device = Config.DEVICES[gpu_id]
     torch.cuda.set_device(gpu_id)
 
     mlflow.set_tracking_uri(Config.IP_LOCAL)
 
     my_jobs = jobs_split[rank]
 
-    print(
-        f"[Rank {rank}] -> GPU {gpu_id} | "
-        f"{len(my_jobs)} jobs"
-    )
+    print(f"[Rank {rank}] -> GPU {gpu_id} | {len(my_jobs)} jobs")
 
-    for model_class, dataset_name, epochs in my_jobs:
+    for model, dataset_encoder, epochs in my_jobs:
         train_experiment_autoencoder(
-            gpu_id=rank,
-            model_class=model_class,
-            dataset_name=dataset_name,
-            batch_size=32,
+            model=model,
+            dataset_encoder_name=dataset_encoder,
             num_epochs=epochs,
-            lr=1e-3
+            device=device
         )
+
         torch.cuda.empty_cache()
+
 
 if __name__ == "__main__":
     import argparse
