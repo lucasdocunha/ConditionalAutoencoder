@@ -26,7 +26,7 @@ def train_classifier(
     lr=1e-3
 ):
     device = Config.DEVICES[gpu_id]
-    batche_sizes_csv = [256, 512, 1024]
+    batche_sizes_csv = [64, 128, 256, 512, 1024]
     datasets_test = ["PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
     transform = return_transform()
     
@@ -158,8 +158,12 @@ def train_classifier(
                 )
 
                 model.eval()
+                
+                all_logits = []
+                all_ids = []
+                
                 with torch.no_grad():
-                    for x, y in tqdm(test_loader):
+                    for batch_idx, (x, y) in enumerate(tqdm(test_loader)):
                         x = x.to(device)
                         y = y.to(device)
 
@@ -168,6 +172,22 @@ def train_classifier(
 
                         y_true.extend(y.cpu().numpy())
                         y_pred.extend(preds.cpu().numpy())
+                        
+                        all_logits.append(out.cpu().numpy())
+                        all_ids.extend(test_loader.dataset.df.iloc[
+                            batch_idx * test_loader.batch_size :
+                            batch_idx * test_loader.batch_size + x.size(0),
+                            0
+                        ].values)
+                        
+                        
+                #salvando as predições para fusões 
+                save_prefix = f"models/{model_name}_{dataset_classifier_name}/{batch_size_csv}/preds/{test_dataset_name}"
+                
+                os.makedirs(os.path.dirname(save_prefix), exist_ok=True)
+                np.save(f"{save_prefix}/logits.npy", np.concatenate(all_logits))
+                np.save(f"{save_prefix}/labels.npy", np.concatenate(y_true))
+                np.save(f"{save_prefix}/ids.npy", np.array(all_ids))
 
                 # métricas
                 acc = accuracy_score(y_true, y_pred)
@@ -192,44 +212,106 @@ def train_classifier(
 
             print(f"✓ {model_name} | {dataset_classifier_name} finalizado")
 
-            os.makedirs(f"models/{model_name}_{dataset_classifier_name}", exist_ok=True)
+            os.makedirs(f"models/{model_name}_{dataset_classifier_name}/{batch_size_csv}/weights/", exist_ok=True)
 
-            torch.save(model.state_dict(), f"models/{model_name}_{dataset_classifier_name}/classifier-{batch_size_csv}.pth")
+            torch.save(model.state_dict(), f"models/{model_name}_{dataset_classifier_name}/{batch_size_csv}/weights/classifier.pth")
+import math
+import argparse
+import torch
+import torch.multiprocessing as mp
+import mlflow
 
+
+# ======================================================
+# Utils
+# ======================================================
+def split_jobs(jobs, n_procs):
+    """
+    Divide os jobs de forma balanceada.
+    """
+    n_procs = min(n_procs, len(jobs))
+    chunk_size = math.ceil(len(jobs) / n_procs)
+
+    return [
+        jobs[i * chunk_size : (i + 1) * chunk_size]
+        for i in range(n_procs)
+        if i * chunk_size < len(jobs)
+    ]
+
+
+# ======================================================
+# Worker
+# ======================================================
 def worker(rank, jobs_split):
+    # -------------------------
+    # GPU mapping
+    # -------------------------
+    num_gpus = len(Config.DEVICES)   # ex: [0,1]
+    gpu_id = rank % num_gpus
+    torch.cuda.set_device(gpu_id)
+
+    # -------------------------
+    # MLflow
+    # -------------------------
     mlflow.set_tracking_uri(Config.IP_LOCAL)
-    torch.cuda.set_device(rank)
+    mlflow.set_experiment("classifier_grid")
 
     my_jobs = jobs_split[rank]
 
-    print(f"[GPU {rank}] recebeu {len(my_jobs)} jobs")
+    print(
+        f"[Rank {rank}] -> GPU {gpu_id} | "
+        f"{len(my_jobs)} jobs"
+    )
 
     for model_encoder, dataset_encoder, dataset_classifier, epochs in my_jobs:
-        print("dataset de classifier: ", dataset_classifier)
+        print(
+            f"[Rank {rank} | GPU {gpu_id}] "
+            f"Encoder={model_encoder.__name__} "
+            f"EncData={dataset_encoder} "
+            f"ClsData={dataset_classifier}"
+        )
+
         train_classifier(
-            gpu_id=rank,
+            gpu_id=gpu_id,
             model_encoder=model_encoder,
             dataset_encoder_name=dataset_encoder,
-            dataset_classifier_name=dataset_classifier,                                 
+            dataset_classifier_name=dataset_classifier,
             batch_size=32,
             num_epochs=epochs,
             lr=1e-3
         )
+
         torch.cuda.empty_cache()
-        
-if __name__ == "__main__": 
-    import argparse
-    
+
+
+# ======================================================
+# Main
+# ======================================================
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--epochs", type=int, default=10, help="Número de épocas para treinamento")
-    parser.add_argument("-c", "--encoders", type=str, default='all', help="Lista de encoders para usar")
-    
+    parser.add_argument(
+        "-e", "--epochs",
+        type=int,
+        default=10,
+        help="Número de épocas"
+    )
+    parser.add_argument(
+        "-c", "--encoders",
+        type=str,
+        default="all",
+        choices=["all", "ae", "skip"],
+        help="Tipo de encoders"
+    )
+
     args = parser.parse_args()
-    
+
     epochs = args.epochs
     type_encoders = args.encoders
 
-    if type_encoders == 'all':
+    # ======================================================
+    # Encoders
+    # ======================================================
+    if type_encoders == "all":
         encoders = [
             Encoder0, Encoder1, Encoder2,
             Encoder3, Encoder4, Encoder5,
@@ -240,33 +322,61 @@ if __name__ == "__main__":
             SkipEncoder6, SkipEncoder7, SkipEncoder8,
             SkipEncoder9
         ]
-    elif type_encoders == 'skip':
-        encoders = [
-            SkipEncoder0, SkipEncoder1, SkipEncoder2,
-            SkipEncoder3, SkipEncoder4, SkipEncoder5,
-            SkipEncoder6, SkipEncoder7, SkipEncoder8,
-            SkipEncoder9
-        ]
-    
-    elif type_encoders == 'ae':
+    elif type_encoders == "ae":
         encoders = [
             Encoder0, Encoder1, Encoder2,
             Encoder3, Encoder4, Encoder5,
             Encoder6, Encoder7, Encoder8,
             Encoder9
         ]
+    elif type_encoders == "skip":
+        encoders = [
+            SkipEncoder0, SkipEncoder1, SkipEncoder2,
+            SkipEncoder3, SkipEncoder4, SkipEncoder5,
+            SkipEncoder6, SkipEncoder7, SkipEncoder8,
+            SkipEncoder9
+        ]
 
-    datasets_classifier = ["PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
-    
+    # ======================================================
+    # Datasets
+    # ======================================================
+    datasets_classifier = [
+        "PUC", "UFPR04", "UFPR05",
+        "camera1", "camera2", "camera3",
+        "camera4", "camera5", "camera6",
+        "camera7", "camera8", "camera9"
+    ]
+
+    datasets_encoder = ["CNR", "PKLot"]
+
+    # ======================================================
+    # Jobs
+    # ======================================================
     jobs = []
-    n_procs = len(Config.DEVICES)
-
-    for dataset_encoder in ["CNR", "PKLot"]:                
+    for dataset_encoder in datasets_encoder:
         for model in encoders:
             for dataset_classifier in datasets_classifier:
-                jobs.append((model, dataset_encoder, dataset_classifier, epochs))
+                jobs.append(
+                    (model, dataset_encoder, dataset_classifier, epochs)
+                )
 
-    jobs_split = [jobs[i::n_procs] for i in range(n_procs)]
+    # Ajuda o allocator da CUDA
+    jobs.sort(key=lambda x: x[0].__name__)
+
+    # ======================================================
+    # Paralelismo
+    # ======================================================
+    NUM_GPUS = len(Config.DEVICES)     # ex: 2
+    PROCS_PER_GPU = 6                 # ~3GB por processo
+
+    n_procs = NUM_GPUS * PROCS_PER_GPU
+    n_procs = min(n_procs, len(jobs))
+
+    jobs_split = split_jobs(jobs, n_procs)
+
+    print(f"Total de jobs: {len(jobs)}")
+    print(f"Processos: {n_procs}")
+    print(f"Jobs por processo: {[len(j) for j in jobs_split]}")
 
     mp.set_start_method("spawn", force=True)
     mp.spawn(
@@ -275,5 +385,3 @@ if __name__ == "__main__":
         nprocs=n_procs,
         join=True
     )
-    
-    
