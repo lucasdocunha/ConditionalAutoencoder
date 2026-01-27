@@ -13,6 +13,7 @@ from src.utils.plot import log_confusion_matrix_mlflow
 from sklearn.metrics import accuracy_score, precision_score, f1_score
 from tqdm import tqdm
 
+import argparse
 
 
 
@@ -215,46 +216,15 @@ def train_classifier(
             os.makedirs(f"models/{model_name}_{dataset_classifier_name}/{batch_size_csv}/weights/", exist_ok=True)
 
             torch.save(model.state_dict(), f"models/{model_name}_{dataset_classifier_name}/{batch_size_csv}/weights/classifier.pth")
-import math
-import argparse
-import torch
-import torch.multiprocessing as mp
-import mlflow
 
 
-# ======================================================
-# Utils
-# ======================================================
-def split_jobs(jobs, n_procs):
-    """
-    Divide os jobs de forma balanceada.
-    """
-    n_procs = min(n_procs, len(jobs))
-    chunk_size = math.ceil(len(jobs) / n_procs)
-
-    return [
-        jobs[i * chunk_size : (i + 1) * chunk_size]
-        for i in range(n_procs)
-        if i * chunk_size < len(jobs)
-    ]
-
-
-# ======================================================
-# Worker
-# ======================================================
 def worker(rank, jobs_split):
-    # -------------------------
     # GPU mapping
-    # -------------------------
     num_gpus = len(Config.DEVICES)   # ex: [0,1]
     gpu_id = rank % num_gpus
     torch.cuda.set_device(gpu_id)
 
-    # -------------------------
-    # MLflow
-    # -------------------------
     mlflow.set_tracking_uri(Config.IP_LOCAL)
-    mlflow.set_experiment("classifier_grid")
 
     my_jobs = jobs_split[rank]
 
@@ -284,9 +254,7 @@ def worker(rank, jobs_split):
         torch.cuda.empty_cache()
 
 
-# ======================================================
 # Main
-# ======================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -308,9 +276,8 @@ if __name__ == "__main__":
     epochs = args.epochs
     type_encoders = args.encoders
 
-    # ======================================================
+
     # Encoders
-    # ======================================================
     if type_encoders == "all":
         encoders = [
             Encoder0, Encoder1, Encoder2,
@@ -337,9 +304,6 @@ if __name__ == "__main__":
             SkipEncoder9
         ]
 
-    # ======================================================
-    # Datasets
-    # ======================================================
     datasets_classifier = [
         "PUC", "UFPR04", "UFPR05",
         "camera1", "camera2", "camera3",
@@ -349,9 +313,6 @@ if __name__ == "__main__":
 
     datasets_encoder = ["CNR", "PKLot"]
 
-    # ======================================================
-    # Jobs
-    # ======================================================
     jobs = []
     for dataset_encoder in datasets_encoder:
         for model in encoders:
@@ -363,9 +324,6 @@ if __name__ == "__main__":
     # Ajuda o allocator da CUDA
     jobs.sort(key=lambda x: x[0].__name__)
 
-    # ======================================================
-    # Paralelismo
-    # ======================================================
     NUM_GPUS = len(Config.DEVICES)     # ex: 2
     PROCS_PER_GPU = 6                 # ~3GB por processo
 

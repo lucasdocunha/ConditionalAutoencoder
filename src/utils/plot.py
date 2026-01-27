@@ -34,9 +34,6 @@ def plot_reconstruction(original, reconstructed, model_name, dataset_name, save_
     plt.savefig(filename, dpi=100, bbox_inches="tight")
     plt.close()
     return filename
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
 import mlflow
 
 def log_confusion_matrix_mlflow(

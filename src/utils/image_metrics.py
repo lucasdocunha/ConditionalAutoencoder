@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torchmetrics.functional import peak_signal_noise_ratio
-from pytorch_msssim import ssim, ms_ssim
+from pytorch_msssim import ssim
 import sewar.full_ref
 import numpy as np
 

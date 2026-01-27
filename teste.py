@@ -1,5 +1,4 @@
 import os
-import tempfile
 import pandas as pd 
 
 for root, _, files in os.walk("CSV"):

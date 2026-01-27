@@ -5,9 +5,6 @@ import os
 import mlflow 
 import mlflow.pytorch
 import torch.multiprocessing as mp
-import torch.nn.functional as F
-from torchmetrics.functional import peak_signal_noise_ratio
-import sewar.full_ref
 
 
 from src.config import *
@@ -173,12 +170,18 @@ def train_experiment_autoencoder(
 
 
 def worker(rank, jobs_split):
+    num_gpus = len(Config.DEVICES)
+    gpu_id = rank % num_gpus
+    torch.cuda.set_device(gpu_id)
+
     mlflow.set_tracking_uri(Config.IP_LOCAL)
-    torch.cuda.set_device(rank)
 
     my_jobs = jobs_split[rank]
 
-    print(f"[GPU {rank}] recebeu {len(my_jobs)} jobs")
+    print(
+        f"[Rank {rank}] -> GPU {gpu_id} | "
+        f"{len(my_jobs)} jobs"
+    )
 
     for model_class, dataset_name, epochs in my_jobs:
         train_experiment_autoencoder(
@@ -218,8 +221,20 @@ if __name__ == "__main__":
     for dataset_encoder in ["CNR", "PKLot"]:
         for model in encoders:
             jobs.append((model, dataset_encoder, epochs))
+            
+    jobs.sort(key=lambda x: x[0].__name__)
 
-    jobs_split = [jobs[i::n_procs] for i in range(n_procs)]
+    NUM_GPUS = len(Config.DEVICES)     # ex: 2
+    PROCS_PER_GPU = 5                 # ~3GB por processo
+
+    n_procs = NUM_GPUS * PROCS_PER_GPU
+    n_procs = min(n_procs, len(jobs))
+
+    jobs_split = split_jobs(jobs, n_procs)
+
+    print(f"Total de jobs: {len(jobs)}")
+    print(f"Processos: {n_procs}")
+    print(f"Jobs por processo: {[len(j) for j in jobs_split]}")
 
     mp.set_start_method("spawn", force=True)
     mp.spawn(
@@ -228,5 +243,3 @@ if __name__ == "__main__":
         nprocs=n_procs,
         join=True
     )
-    
-    
