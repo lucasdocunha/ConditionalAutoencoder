@@ -33,7 +33,11 @@ def train_classifier(
     transform = return_transform()
     
 
-    experiment = f"Classifier_{model_encoder.__name__[-1]}"
+    experiment = (
+    f"Classifier_Skip_{model_encoder.__name__[-1]}"
+    if model_encoder.__name__.startswith("Skip")
+    else f"Classifier_AE_{model_encoder.__name__[-1]}"
+    )
     client = MlflowClient()
     exp = client.get_experiment_by_name(experiment)
 
@@ -42,23 +46,23 @@ def train_classifier(
 
     mlflow.set_experiment(experiment)
           
+    encoder = model_encoder().to(device)
+    
+
+    model_encoder_name = model_encoder.__name__
+    if re.search(r"^Skip", model_encoder_name):
+        name_encoder = f"SkipAutoencoder{model_encoder_name[-1]}"
+    else:
+        name_encoder = f"Autoencoder{model_encoder_name[-1]}"
+
+    encoder.load_state_dict(torch.load(f"models/{name_encoder}_{dataset_encoder_name}/encoder.pth", map_location=device))
+    
+    for p in encoder.parameters():
+        p.requires_grad = False
+        
+    latent_dim = encoder.latent_dim
     for batch_size_csv in batche_sizes_csv:
-        encoder = model_encoder().to(device)
         
-
-        model_encoder_name = model_encoder.__name__
-        if re.search(r"^Skip", model_encoder_name):
-            name_encoder = f"SkipAutoencoder{model_encoder_name[-1]}"
-        else:
-            name_encoder = f"Autoencoder{model_encoder_name[-1]}"
-
-
-        encoder.load_state_dict(torch.load(f"models/{name_encoder}_{dataset_encoder_name}/encoder.pth", map_location=device))
-        
-        for p in encoder.parameters():
-            p.requires_grad = False
-
-        latent_dim = encoder.latent_dim
           
         model = Classifier(encoder, latent_dim=latent_dim, num_classes=2).to(device)
         
@@ -79,7 +83,7 @@ def train_classifier(
 
         
         model_name = f"{model_encoder.__name__}_Classifier"
-        with mlflow.start_run(run_name=f"{model_name}_{dataset_classifier_name}"):
+        with mlflow.start_run(run_name=f"{model_name}_{dataset_classifier_name}_{batch_size_csv}"):
 
             mlflow.log_param("model", model_name)
             mlflow.log_param("encoder_dataset", dataset_encoder_name)
