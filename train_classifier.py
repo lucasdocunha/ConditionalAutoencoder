@@ -12,9 +12,10 @@ from src.models import *
 from src.utils.plot import log_confusion_matrix_mlflow
 from sklearn.metrics import accuracy_score, precision_score, f1_score
 from tqdm import tqdm
+import re
 
 import argparse
-
+from mlflow.tracking import MlflowClient
 
 
 def train_classifier(
@@ -31,13 +32,28 @@ def train_classifier(
     datasets_test = ["PUC", "UFPR04", "UFPR05", "camera1", "camera2", "camera3", "camera4", "camera5", "camera6", "camera7", "camera8", "camera9"]
     transform = return_transform()
     
-    mlflow.set_experiment(f"Classifier_{model_encoder.__name__[-1]}")        
+
+    experiment = f"Classifier_{model_encoder.__name__[-1]}"
+    client = MlflowClient()
+    exp = client.get_experiment_by_name(experiment)
+
+    if exp is not None and exp.lifecycle_stage == "deleted":
+        client.restore_experiment(exp.experiment_id)
+
+    mlflow.set_experiment(experiment)
           
     for batch_size_csv in batche_sizes_csv:
         encoder = model_encoder().to(device)
         
 
-        encoder.load_state_dict(torch.load(f"models/Autoencoder{model_encoder.__name__[-1]}_{dataset_encoder_name}/encoder.pth", map_location=device))
+        model_encoder_name = model_encoder.__name__
+        if re.search(r"^Skip", model_encoder_name):
+            name_encoder = f"SkipAutoencoder{model_encoder_name[-1]}"
+        else:
+            name_encoder = f"Autoencoder{model_encoder_name[-1]}"
+
+
+        encoder.load_state_dict(torch.load(f"models/{name_encoder}_{dataset_encoder_name}/encoder.pth", map_location=device))
         
         for p in encoder.parameters():
             p.requires_grad = False
@@ -270,6 +286,12 @@ if __name__ == "__main__":
         choices=["all", "ae", "skip"],
         help="Tipo de encoders"
     )
+    parser.add_argument(
+        "-p", "--n_procs",
+        type=int,
+        default=8,
+        help="Número de processos por GPU"
+    )
 
     args = parser.parse_args()
 
@@ -325,7 +347,7 @@ if __name__ == "__main__":
     jobs.sort(key=lambda x: x[0].__name__)
 
     NUM_GPUS = len(Config.DEVICES)     # ex: 2
-    PROCS_PER_GPU = 6                 # ~3GB por processo
+    PROCS_PER_GPU = args.n_procs                # ~3GB por processo
 
     n_procs = NUM_GPUS * PROCS_PER_GPU
     n_procs = min(n_procs, len(jobs))

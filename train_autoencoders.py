@@ -5,7 +5,7 @@ import os
 import mlflow 
 import mlflow.pytorch
 import torch.multiprocessing as mp
-
+from tqdm import tqdm
 
 from src.config import *
 from src.utils.datasets import CustomImageDataset
@@ -70,9 +70,15 @@ def train_experiment_autoencoder(
         # -------------------------
         for epoch in range(num_epochs):
 
+            pbar = tqdm(
+                train_loader,
+                desc=f"Epoch [{epoch+1}/{num_epochs}]",
+                leave=False
+            )
+
             model.train()
             train_loss = 0.0
-            for x, y in train_loader:
+            for x, y in pbar:
                 x, y = x.to(device), y.to(device)
 
                 out = model(x)
@@ -173,7 +179,6 @@ def worker(rank, jobs_split):
     NUM_GPUS = len(Config.DEVICES)
     gpu_id = rank % NUM_GPUS
 
-    device = Config.DEVICES[gpu_id]
     torch.cuda.set_device(gpu_id)
 
     mlflow.set_tracking_uri(Config.IP_LOCAL)
@@ -184,10 +189,10 @@ def worker(rank, jobs_split):
 
     for model, dataset_encoder, epochs in my_jobs:
         train_experiment_autoencoder(
-            model=model,
-            dataset_encoder_name=dataset_encoder,
+            model_class=model,
+            dataset_name=dataset_encoder,
             num_epochs=epochs,
-            device=device
+            gpu_id=int(gpu_id)
         )
 
         torch.cuda.empty_cache()
