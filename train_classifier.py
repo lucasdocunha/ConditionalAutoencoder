@@ -94,10 +94,8 @@ def train_classifier(
         p.requires_grad = False
 
     latent_dim = encoder.latent_dim
-<<<<<<< HEAD
     for batch_size_csv in batche_sizes_csv:
         
-          
         model = Classifier(encoder, latent_dim=latent_dim, num_classes=2).to(device)
         
         train_csv = f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{dataset_classifier_name}/batches/batch-{batch_size_csv}.csv"
@@ -110,26 +108,6 @@ def train_classifier(
             train_dataset, source=train_csv, name=f"{dataset_classifier_name}_{batch_size_csv}"
         )
         
-=======
-
-        # Loop por tamanho de batch CSV
-    
-    for batch_size_csv in batch_sizes_csv:
-
-        model = Classifier(
-            encoder,
-            latent_dim=latent_dim,
-            num_classes=2
-        ).to(device)
-
-        train_dataset = CustomImageDataset(
-            f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/"
-            f"{dataset_classifier_name}/batches/batch-{batch_size_csv}.csv",
-            transform=transform,
-            autoencoder=False
-        )
-
->>>>>>> 520ac681d7038b011c4c939c57f1ace290ef32c3
         val_dataset = CustomImageDataset(
             f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/"
             f"{dataset_classifier_name}/{dataset_classifier_name}_validation.csv",
@@ -156,13 +134,10 @@ def train_classifier(
         )
 
         model_name = f"{model_encoder.__name__}_Classifier"
-<<<<<<< HEAD
         
         mlflow.enable_system_metrics_logging()
         with mlflow.start_run(run_name=f"{model_name}_{dataset_classifier_name}_{batch_size_csv}"):
             mlflow.log_input(train_dataset_mlflow, context="training")
-=======
->>>>>>> 520ac681d7038b011c4c939c57f1ace290ef32c3
 
         # -----------------------------
         # Cache test loaders
@@ -314,16 +289,16 @@ def train_classifier(
 
             mlflow.pytorch.log_model(model, "classifier")
 
-            os.makedirs(
+            """os.makedirs(
                 f"models/{model_name}_{dataset_classifier_name}/"
                 f"{batch_size_csv}/weights/",
                 exist_ok=True
-            )
-            torch.save(
+            )"""
+            """torch.save(
                 model.state_dict(),
                 f"models/{model_name}_{dataset_classifier_name}/"
                 f"{batch_size_csv}/weights/classifier.pth"
-            )
+            )"""
 
 
 def worker(rank, jobs_by_gpu):
