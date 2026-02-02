@@ -66,11 +66,16 @@ def train_classifier(
           
         model = Classifier(encoder, latent_dim=latent_dim, num_classes=2).to(device)
         
+        train_csv = f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{dataset_classifier_name}/batches/batch-{batch_size_csv}.csv"
         train_dataset = CustomImageDataset(
-            f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{dataset_classifier_name}/batches/batch-{batch_size_csv}.csv",
+            train_csv,
             transform=transform,
             autoencoder=False
         )
+        train_dataset_mlflow = mlflow.data.from_pandas(
+            train_dataset, source=train_csv, name=f"{dataset_classifier_name}_{batch_size_csv}"
+        )
+        
         val_dataset = CustomImageDataset(
             f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{dataset_classifier_name}/{dataset_classifier_name}_validation.csv",
             transform=transform,
@@ -83,7 +88,10 @@ def train_classifier(
 
         
         model_name = f"{model_encoder.__name__}_Classifier"
+        
+        mlflow.enable_system_metrics_logging()
         with mlflow.start_run(run_name=f"{model_name}_{dataset_classifier_name}_{batch_size_csv}"):
+            mlflow.log_input(train_dataset_mlflow, context="training")
 
             mlflow.log_param("model", model_name)
             mlflow.log_param("encoder_dataset", dataset_encoder_name)
