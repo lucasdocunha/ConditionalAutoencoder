@@ -94,7 +94,7 @@ def train_classifier(
         p.requires_grad = False
 
     latent_dim = encoder.latent_dim
-    for batch_size_csv in batche_sizes_csv:
+    for batch_size_csv in batch_sizes_csv:
         
         model = Classifier(encoder, latent_dim=latent_dim, num_classes=2).to(device)
         
@@ -105,7 +105,7 @@ def train_classifier(
             autoencoder=False
         )
         train_dataset_mlflow = mlflow.data.from_pandas(
-            train_dataset, source=train_csv, name=f"{dataset_classifier_name}_{batch_size_csv}"
+            pd.read_csv(train_csv), source=train_csv, name=f"{dataset_classifier_name}_{batch_size_csv}"
         )
         
         val_dataset = CustomImageDataset(
@@ -119,25 +119,23 @@ def train_classifier(
             train_dataset,
             batch_size=batch_size,
             shuffle=True,
-            num_workers=4,
-            pin_memory=True,
-            persistent_workers=True
+            num_workers=0,
+            pin_memory=False,
+            persistent_workers=False
         )
 
         val_loader = DataLoader(
             val_dataset,
             batch_size=batch_size,
             shuffle=False,
-            num_workers=4,
-            pin_memory=True,
-            persistent_workers=True
+            num_workers=0,
+            pin_memory=False,
+            persistent_workers=False
         )
 
         model_name = f"{model_encoder.__name__}_Classifier"
         
         mlflow.enable_system_metrics_logging()
-        with mlflow.start_run(run_name=f"{model_name}_{dataset_classifier_name}_{batch_size_csv}"):
-            mlflow.log_input(train_dataset_mlflow, context="training")
 
         # -----------------------------
         # Cache test loaders
@@ -166,6 +164,8 @@ def train_classifier(
             mlflow.log_param("lr", lr)
             mlflow.log_param("loss", "CrossEntropy")
             mlflow.log_param("input_shape", "3x128x128")
+            mlflow.log_input(train_dataset_mlflow, context="training")
+
 
             criterion = nn.CrossEntropyLoss()
             optimizer = torch.optim.Adam(model.parameters(), lr=lr)
