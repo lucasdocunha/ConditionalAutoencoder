@@ -222,7 +222,7 @@ if __name__ == "__main__":
     jobs = []
     n_procs = len(Config.DEVICES)
 
-    for dataset_encoder in ["PKLot"]:
+    for dataset_encoder in ["CNR", "PKLot"]:
         for model in encoders:
             jobs.append((model, dataset_encoder, epochs))
             

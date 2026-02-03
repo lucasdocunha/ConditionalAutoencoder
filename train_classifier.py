@@ -2,10 +2,12 @@ import os
 import re
 import argparse
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.multiprocessing as mp
 import mlflow
+import mlflow.pytorch
 
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -20,7 +22,7 @@ from src.utils.plot import log_confusion_matrix_mlflow
 
 
 # Utils
-def make_test_loader(csv_path, transform, batch_size):
+def make_test_loader(csv_path, transform, batch_size, pin_memory):
     dataset = CustomImageDataset(
         csv_path,
         transform=transform,
@@ -29,8 +31,9 @@ def make_test_loader(csv_path, transform, batch_size):
     return DataLoader(
         dataset,
         batch_size=batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=0,
+        pin_memory=pin_memory,
         prefetch_factor=None,
         persistent_workers=False
     )
@@ -48,6 +51,9 @@ def train_classifier(
 ):
     device = Config.DEVICES[gpu_id]
     transform = return_transform()
+    pin_memory = isinstance(device, str) and device.startswith("cuda")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_root = os.path.join(base_dir, "CSV")
 
     batch_sizes_csv = [64, 128, 256, 512, 1024]
     datasets_test = [
@@ -98,7 +104,12 @@ def train_classifier(
         
         model = Classifier(encoder, latent_dim=latent_dim, num_classes=2).to(device)
         
-        train_csv = f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/{dataset_classifier_name}/batches/batch-{batch_size_csv}.csv"
+        train_csv = os.path.join(
+            csv_root,
+            dataset_classifier_name,
+            "batches",
+            f"batch-{batch_size_csv}.csv"
+        )
         train_dataset = CustomImageDataset(
             train_csv,
             transform=transform,
@@ -109,8 +120,11 @@ def train_classifier(
         )
         
         val_dataset = CustomImageDataset(
-            f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/"
-            f"{dataset_classifier_name}/{dataset_classifier_name}_validation.csv",
+            os.path.join(
+                csv_root,
+                dataset_classifier_name,
+                f"{dataset_classifier_name}_validation.csv"
+            ),
             transform=transform,
             autoencoder=False
         )
@@ -120,7 +134,7 @@ def train_classifier(
             batch_size=batch_size,
             shuffle=True,
             num_workers=0,
-            pin_memory=False,
+            pin_memory=pin_memory,
             persistent_workers=False
         )
 
@@ -129,7 +143,7 @@ def train_classifier(
             batch_size=batch_size,
             shuffle=False,
             num_workers=0,
-            pin_memory=False,
+            pin_memory=pin_memory,
             persistent_workers=False
         )
 
@@ -142,10 +156,10 @@ def train_classifier(
         # -----------------------------
         test_loaders = {
             name: make_test_loader(
-                f"/home/lucas.ocunha/ConditionalAutoencoder/CSV/"
-                f"{name}/{name}_test.csv",
+                os.path.join(csv_root, name, f"{name}_test.csv"),
                 transform,
-                batch_size
+                batch_size,
+                pin_memory
             )
             for name in datasets_test
         }
@@ -379,4 +393,3 @@ if __name__ == "__main__":
         args=(jobs_by_gpu,),
         nprocs=2
     )
-
